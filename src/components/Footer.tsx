@@ -1,13 +1,14 @@
-import { Leaf, Instagram, Facebook, Mail } from "lucide-react";
+import { Instagram, Facebook, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
 export const Footer = () => (
   <footer className="bg-earth text-earth-foreground mt-20">
     <div className="container mx-auto px-4 py-16 grid gap-10 md:grid-cols-4">
       <div className="md:col-span-2">
-        <div className="flex items-center gap-2 mb-4">
-          <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-            <Leaf className="h-5 w-5 text-secondary-foreground" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-12 w-12 rounded-full bg-background/95 flex items-center justify-center p-1.5">
+            <img src={logo} alt="Projeto Natureza" className="h-full w-full object-contain" />
           </div>
           <span className="font-display text-xl font-bold">Projeto Natureza</span>
         </div>
