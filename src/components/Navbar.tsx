@@ -23,11 +23,9 @@ export const Navbar = () => {
     <header className="sticky top-0 z-50 backdrop-blur-md bg-background/80 border-b border-border/50">
       <div className="container mx-auto flex h-20 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-3 group">
-          <img
-            src={logo}
-            alt="Projeto Natureza"
-            className="h-12 w-12 object-contain group-hover:rotate-6 transition-transform"
-          />
+          <div className="h-10 w-10 rounded-full bg-gradient-leaf flex items-center justify-center shadow-soft group-hover:rotate-12 transition-transform p-1.5">
+            <img src={logo} alt="Projeto Natureza" className="h-full w-full object-contain" />
+          </div>
           <div className="leading-tight">
             <div className="font-display text-lg font-bold text-primary">Projeto Natureza</div>
             <div className="text-[10px] uppercase tracking-widest text-muted-foreground">Vida com propósito</div>

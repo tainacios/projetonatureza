@@ -7,7 +7,7 @@ export const Footer = () => (
     <div className="container mx-auto px-4 py-16 grid gap-10 md:grid-cols-4">
       <div className="md:col-span-2">
         <div className="flex items-center gap-3 mb-4">
-          <div className="h-12 w-12 rounded-full bg-background/95 flex items-center justify-center p-1.5">
+          <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center p-1.5">
             <img src={logo} alt="Projeto Natureza" className="h-full w-full object-contain" />
           </div>
           <span className="font-display text-xl font-bold">Projeto Natureza</span>
