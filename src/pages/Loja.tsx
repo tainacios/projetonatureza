@@ -100,6 +100,7 @@ const Loja = () => {
               <p className="text-secondary uppercase text-xs tracking-widest font-semibold">Bem-vindo(a) de volta</p>
               <h1 className="font-display text-4xl md:text-5xl font-bold mt-1">Olá, {firstName} 🌿</h1>
               <p className="text-primary-foreground/80 mt-3 max-w-md">Continue plantando boas ações — cada uma vale pontos e impacto real.</p>
+              <a href="/termo-ecopontos?view=1" className="inline-block mt-3 text-xs text-secondary underline underline-offset-4 hover:text-accent transition-colors">Ver termo de participação</a>
             </div>
             <div className="bg-primary-foreground/10 backdrop-blur rounded-3xl p-6 border border-primary-foreground/15 shadow-soft">
               <div className="flex items-center gap-3 mb-3">
