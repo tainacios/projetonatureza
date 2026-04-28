@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTermsAcceptance } from "@/hooks/useTermsAcceptance";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -28,6 +29,7 @@ const nextOf = (pts: number) => NEXT_LEVELS.find((p) => pts < p) ?? NEXT_LEVELS[
 
 const Loja = () => {
   const { user, loading: authLoading } = useAuth();
+  const { hasAccepted, loading: termsLoading } = useTermsAcceptance();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -37,6 +39,12 @@ const Loja = () => {
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (!authLoading && user && !termsLoading && !hasAccepted) {
+      navigate("/termo-ecopontos", { replace: true });
+    }
+  }, [authLoading, user, termsLoading, hasAccepted, navigate]);
 
   const loadAll = async () => {
     if (!user) return;
