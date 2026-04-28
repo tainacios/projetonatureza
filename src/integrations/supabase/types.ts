@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      ecopoints_terms_acceptance: {
+        Row: {
+          accepted_at: string
+          id: string
+          signature_name: string
+          terms_version: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          id?: string
+          signature_name: string
+          terms_version?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          id?: string
+          signature_name?: string
+          terms_version?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string

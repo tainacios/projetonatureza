@@ -13,6 +13,7 @@ import Depoimentos from "./pages/Depoimentos.tsx";
 import Transparencia from "./pages/Transparencia.tsx";
 import Apadrinhe from "./pages/Apadrinhe.tsx";
 import Galeria from "./pages/Galeria.tsx";
+import TermoEcoPontos from "./pages/TermoEcoPontos.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/transparencia" element={<Transparencia />} />
             <Route path="/apadrinhe" element={<Apadrinhe />} />
             <Route path="/galeria" element={<Galeria />} />
+            <Route path="/termo-ecopontos" element={<TermoEcoPontos />} />
             <Route path="/dashboard" element={<Loja />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTermsAcceptance } from "@/hooks/useTermsAcceptance";
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -28,6 +29,7 @@ const nextOf = (pts: number) => NEXT_LEVELS.find((p) => pts < p) ?? NEXT_LEVELS[
 
 const Loja = () => {
   const { user, loading: authLoading } = useAuth();
+  const { hasAccepted, loading: termsLoading } = useTermsAcceptance();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [rewards, setRewards] = useState<Reward[]>([]);
@@ -37,6 +39,12 @@ const Loja = () => {
   useEffect(() => {
     if (!authLoading && !user) navigate("/auth");
   }, [user, authLoading, navigate]);
+
+  useEffect(() => {
+    if (!authLoading && user && !termsLoading && !hasAccepted) {
+      navigate("/termo-ecopontos", { replace: true });
+    }
+  }, [authLoading, user, termsLoading, hasAccepted, navigate]);
 
   const loadAll = async () => {
     if (!user) return;
@@ -92,6 +100,7 @@ const Loja = () => {
               <p className="text-secondary uppercase text-xs tracking-widest font-semibold">Bem-vindo(a) de volta</p>
               <h1 className="font-display text-4xl md:text-5xl font-bold mt-1">Olá, {firstName} 🌿</h1>
               <p className="text-primary-foreground/80 mt-3 max-w-md">Continue plantando boas ações — cada uma vale pontos e impacto real.</p>
+              <a href="/termo-ecopontos?view=1" className="inline-block mt-3 text-xs text-secondary underline underline-offset-4 hover:text-accent transition-colors">Ver termo de participação</a>
             </div>
             <div className="bg-primary-foreground/10 backdrop-blur rounded-3xl p-6 border border-primary-foreground/15 shadow-soft">
               <div className="flex items-center gap-3 mb-3">
