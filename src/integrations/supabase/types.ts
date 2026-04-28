@@ -113,6 +113,45 @@ export type Database = {
         }
         Relationships: []
       }
+      testimonials: {
+        Row: {
+          action_name: string
+          approved: boolean
+          avatar_url: string | null
+          content: string
+          created_at: string
+          id: string
+          rating: number
+          updated_at: string
+          user_id: string
+          volunteer_name: string
+        }
+        Insert: {
+          action_name: string
+          approved?: boolean
+          avatar_url?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id: string
+          volunteer_name: string
+        }
+        Update: {
+          action_name?: string
+          approved?: boolean
+          avatar_url?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          updated_at?: string
+          user_id?: string
+          volunteer_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
