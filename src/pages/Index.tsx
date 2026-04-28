@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/Layout";
 import { LeafShape } from "@/components/LeafShape";
 import heroImg from "@/assets/hero-volunteers.jpg";
+import { Testimonials } from "@/components/Testimonials";
 import childrenImg from "@/assets/action-children.jpg";
 import elderlyImg from "@/assets/action-elderly.jpg";
 import natureImg from "@/assets/action-nature.jpg";
@@ -139,6 +140,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* DEPOIMENTOS */}
+      <Testimonials limit={6} />
 
       {/* ECOPONTOS CTA */}
       <section className="py-20 md:py-28 bg-primary text-primary-foreground relative overflow-hidden">
