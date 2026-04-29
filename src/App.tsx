@@ -15,6 +15,14 @@ import Apadrinhe from "./pages/Apadrinhe.tsx";
 import Galeria from "./pages/Galeria.tsx";
 import TermoEcoPontos from "./pages/TermoEcoPontos.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import AdminDashboard from "./pages/admin/AdminDashboard.tsx";
+import AdminVoluntarios from "./pages/admin/AdminVoluntarios.tsx";
+import AdminEcoPontos from "./pages/admin/AdminEcoPontos.tsx";
+import AdminLoja from "./pages/admin/AdminLoja.tsx";
+import AdminGaleria from "./pages/admin/AdminGaleria.tsx";
+import AdminDepoimentos from "./pages/admin/AdminDepoimentos.tsx";
+import AdminTermos from "./pages/admin/AdminTermos.tsx";
+import AdminNotificacoes from "./pages/admin/AdminNotificacoes.tsx";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +45,14 @@ const App = () => (
             <Route path="/galeria" element={<Galeria />} />
             <Route path="/termo-ecopontos" element={<TermoEcoPontos />} />
             <Route path="/dashboard" element={<Loja />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/voluntarios" element={<AdminVoluntarios />} />
+            <Route path="/admin/ecopontos" element={<AdminEcoPontos />} />
+            <Route path="/admin/loja" element={<AdminLoja />} />
+            <Route path="/admin/galeria" element={<AdminGaleria />} />
+            <Route path="/admin/depoimentos" element={<AdminDepoimentos />} />
+            <Route path="/admin/termos" element={<AdminTermos />} />
+            <Route path="/admin/notificacoes" element={<AdminNotificacoes />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
