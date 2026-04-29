@@ -98,11 +98,18 @@ export const Navbar = () => {
                 {l.label}
               </Link>
             ))}
-            <div className="pt-2">
+            <div className="pt-2 space-y-2">
               {user ? (
-                <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
-                  Minha área
-                </Button>
+                <>
+                  {isAdmin && (
+                    <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/admin"); }}>
+                      <Shield className="h-4 w-4 mr-1" /> Admin
+                    </Button>
+                  )}
+                  <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                    Minha área
+                  </Button>
+                </>
               ) : (
                 <Button variant="hero" className="w-full" onClick={() => { setOpen(false); navigate("/auth"); }}>
                   Sou voluntário
