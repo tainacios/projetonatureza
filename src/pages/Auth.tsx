@@ -64,17 +64,23 @@ const Auth = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({
       email: parsed.data.email,
       password: parsed.data.password,
     });
-    setLoading(false);
-    if (error) {
+    if (error || !signInData.user) {
+      setLoading(false);
       toast.error("Email ou senha inválidos");
       return;
     }
+    // Check if user is admin and redirect accordingly
+    const { data: isAdmin } = await supabase.rpc("has_role", {
+      _user_id: signInData.user.id,
+      _role: "admin",
+    });
+    setLoading(false);
     toast.success("Que bom te ver de novo!");
-    navigate("/dashboard");
+    navigate(isAdmin ? "/admin" : "/dashboard");
   };
 
   return (
