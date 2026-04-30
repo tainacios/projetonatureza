@@ -21,6 +21,8 @@ const signInSchema = z.object({
   password: z.string().min(1, "Informe sua senha"),
 });
 
+const TERMS_VERSION = "1.0";
+
 const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -73,14 +75,21 @@ const Auth = () => {
       toast.error("Email ou senha inválidos");
       return;
     }
-    // Check if user is admin and redirect accordingly
-    const { data: isAdmin } = await supabase.rpc("has_role", {
-      _user_id: signInData.user.id,
-      _role: "admin",
-    });
+    const [{ data: isAdmin, error: roleError }, { data: termsAccepted, error: termsError }] =
+      await Promise.all([
+        supabase.rpc("has_role", {
+          _user_id: signInData.user.id,
+          _role: "admin",
+        }),
+        supabase.rpc("has_accepted_ecopoints_terms", {
+          _terms_version: TERMS_VERSION,
+        }),
+      ]);
+    if (roleError) console.error("Erro ao verificar perfil admin:", roleError);
+    if (termsError) console.error("Erro ao verificar aceite do termo:", termsError);
     setLoading(false);
     toast.success("Que bom te ver de novo!");
-    navigate(isAdmin ? "/admin" : "/dashboard");
+    navigate(isAdmin ? "/admin" : termsAccepted ? "/dashboard" : "/termo-ecopontos");
   };
 
   return (
