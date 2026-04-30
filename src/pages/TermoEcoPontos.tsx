@@ -48,20 +48,21 @@ const TermoEcoPontos = () => {
   );
 
   const handleAccept = async () => {
-    if (!user || !canSubmit) return;
+    if (!user || submitting || !canSubmit) return;
     setSubmitting(true);
-    const { error } = await supabase.from("ecopoints_terms_acceptance").insert({
-      user_id: user.id,
-      signature_name: signature.trim(),
-      terms_version: TERMS_VERSION,
+    const { error } = await supabase.rpc("accept_ecopoints_terms", {
+      _signature_name: signature.trim(),
+      _terms_version: TERMS_VERSION,
     });
-    setSubmitting(false);
     if (error) {
+      console.error("Erro ao aceitar termo EcoPontos:", error);
+      setSubmitting(false);
       toast.error("Não foi possível registrar o aceite. Tente novamente.");
       return;
     }
     toast.success("🌿 Termo aceito! Bem-vindo(a) ao EcoPontos.");
     await refresh();
+    setSubmitting(false);
     navigate("/loja", { replace: true });
   };
 

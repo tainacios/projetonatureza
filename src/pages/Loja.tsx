@@ -79,7 +79,7 @@ const Loja = () => {
     loadAll();
   };
 
-  if (authLoading || !profile) {
+  if (authLoading || termsLoading || !profile) {
     return <Layout><div className="container py-20 text-center text-muted-foreground">Carregando sua área...</div></Layout>;
   }
 

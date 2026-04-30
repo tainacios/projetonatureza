@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       ecopoints_terms_acceptance: {
         Row: {
+          accepted: boolean
           accepted_at: string
           id: string
           signature_name: string
@@ -23,6 +24,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accepted?: boolean
           accepted_at?: string
           id?: string
           signature_name: string
@@ -30,6 +32,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accepted?: boolean
           accepted_at?: string
           id?: string
           signature_name?: string
@@ -271,6 +274,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_ecopoints_terms: {
+        Args: { _signature_name: string; _terms_version?: string }
+        Returns: {
+          accepted: boolean
+          accepted_at: string
+          id: string
+          signature_name: string
+          terms_version: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ecopoints_terms_acceptance"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      has_accepted_ecopoints_terms: {
+        Args: { _terms_version?: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
