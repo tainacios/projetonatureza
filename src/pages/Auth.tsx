@@ -54,7 +54,7 @@ const Auth = () => {
       return;
     }
     toast.success("Bem-vindo(a) à rede! 🌱");
-    navigate("/dashboard");
+    navigate("/termo-ecopontos");
   };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
