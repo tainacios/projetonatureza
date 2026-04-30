@@ -7,7 +7,10 @@ export interface TermsAcceptance {
   signature_name: string;
   terms_version: string;
   accepted_at: string;
+  accepted: boolean;
 }
+
+const TERMS_VERSION = "1.0";
 
 export const useTermsAcceptance = () => {
   const { user, loading: authLoading } = useAuth();
@@ -21,11 +24,16 @@ export const useTermsAcceptance = () => {
       return;
     }
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("ecopoints_terms_acceptance")
       .select("*")
       .eq("user_id", user.id)
+      .eq("terms_version", TERMS_VERSION)
+      .eq("accepted", true)
       .maybeSingle();
+    if (error) {
+      console.error("Erro ao verificar aceite do termo EcoPontos:", error);
+    }
     setAcceptance((data as TermsAcceptance) ?? null);
     setLoading(false);
   };
@@ -36,5 +44,5 @@ export const useTermsAcceptance = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, authLoading]);
 
-  return { acceptance, hasAccepted: !!acceptance, loading: authLoading || loading, refresh };
+  return { acceptance, hasAccepted: acceptance?.accepted === true, loading: authLoading || loading, refresh };
 };
