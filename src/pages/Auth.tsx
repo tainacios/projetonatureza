@@ -75,21 +75,27 @@ const Auth = () => {
       toast.error("Email ou senha inválidos");
       return;
     }
-    const [{ data: isAdmin, error: roleError }, { data: termsAccepted, error: termsError }] =
+    const [{ data: adminRole, error: roleError }, { data: termsRecord, error: termsError }] =
       await Promise.all([
-        supabase.rpc("has_role", {
-          _user_id: signInData.user.id,
-          _role: "admin",
-        }),
-        supabase.rpc("has_accepted_ecopoints_terms", {
-          _terms_version: TERMS_VERSION,
-        }),
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", signInData.user.id)
+          .eq("role", "admin")
+          .maybeSingle(),
+        supabase
+          .from("ecopoints_terms_acceptance")
+          .select("id")
+          .eq("user_id", signInData.user.id)
+          .eq("terms_version", TERMS_VERSION)
+          .eq("accepted", true)
+          .maybeSingle(),
       ]);
     if (roleError) console.error("Erro ao verificar perfil admin:", roleError);
     if (termsError) console.error("Erro ao verificar aceite do termo:", termsError);
     setLoading(false);
     toast.success("Que bom te ver de novo!");
-    navigate(isAdmin ? "/admin" : termsAccepted ? "/dashboard" : "/termo-ecopontos");
+    navigate(adminRole ? "/admin" : termsRecord ? "/dashboard" : "/termo-ecopontos");
   };
 
   return (
