@@ -17,23 +17,13 @@ export const useUserRole = () => {
     let active = true;
     setLoading(true);
     (async () => {
-      // Try RPC first (most reliable, bypasses RLS via SECURITY DEFINER)
-      const { data: rpcData, error: rpcError } = await supabase.rpc("has_role", {
-        _user_id: user.id,
-        _role: "admin",
-      });
-      if (active && !rpcError && typeof rpcData === "boolean") {
-        setIsAdmin(rpcData);
-        setLoading(false);
-        return;
-      }
-      // Fallback: direct table query
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", user.id)
         .eq("role", "admin")
         .maybeSingle();
+      if (error) console.error("Erro ao verificar perfil admin:", error);
       if (active) {
         setIsAdmin(!!data);
         setLoading(false);
