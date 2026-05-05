@@ -31,18 +31,33 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 
-const items = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true },
-  { title: "Voluntários", url: "/admin/voluntarios", icon: Users },
-  { title: "EcoPontos", url: "/admin/ecopontos", icon: Star },
-  { title: "Loja", url: "/admin/loja", icon: ShoppingBag },
-  { title: "Galeria", url: "/admin/galeria", icon: ImageIcon },
-  { title: "Depoimentos", url: "/admin/depoimentos", icon: MessageSquare },
-  { title: "Termos", url: "/admin/termos", icon: FileCheck },
-  { title: "Notificações", url: "/admin/notificacoes", icon: Bell },
+import { Shield } from "lucide-react";
+
+type ItemPerm = "loja" | "galeria" | "depoimentos" | "acoes" | "master" | null;
+const items: { title: string; url: string; icon: any; end?: boolean; perm: ItemPerm }[] = [
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true, perm: null },
+  { title: "Voluntários", url: "/admin/voluntarios", icon: Users, perm: null },
+  { title: "EcoPontos", url: "/admin/ecopontos", icon: Star, perm: "acoes" },
+  { title: "Loja", url: "/admin/loja", icon: ShoppingBag, perm: "loja" },
+  { title: "Galeria", url: "/admin/galeria", icon: ImageIcon, perm: "galeria" },
+  { title: "Depoimentos", url: "/admin/depoimentos", icon: MessageSquare, perm: "depoimentos" },
+  { title: "Termos", url: "/admin/termos", icon: FileCheck, perm: null },
+  { title: "Notificações", url: "/admin/notificacoes", icon: Bell, perm: null },
+  { title: "Permissões", url: "/admin/permissoes", icon: Shield, perm: "master" },
 ];
 
-const AdminSidebar = () => {
+const AdminSidebar = ({
+  permissions,
+  isMasterAdmin,
+}: {
+  permissions: { loja: boolean; galeria: boolean; depoimentos: boolean; acoes: boolean };
+  isMasterAdmin: boolean;
+}) => {
+  const visibleItems = items.filter((it) => {
+    if (it.perm === null) return true;
+    if (it.perm === "master") return isMasterAdmin;
+    return permissions[it.perm];
+  });
   const { pathname } = useLocation();
   return (
     <Sidebar collapsible="icon">
@@ -64,7 +79,7 @@ const AdminSidebar = () => {
           <SidebarGroupLabel>Gestão</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
+              {visibleItems.map((item) => {
                 const active = item.end
                   ? pathname === item.url
                   : pathname.startsWith(item.url);
@@ -105,7 +120,7 @@ const AdminSidebar = () => {
 
 export const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, isMasterAdmin, permissions, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
   if (authLoading || roleLoading) {
@@ -121,7 +136,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <AdminSidebar />
+        <AdminSidebar permissions={permissions} isMasterAdmin={isMasterAdmin} />
         <div className="flex-1 flex flex-col">
           <header className="h-14 flex items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur px-4 sticky top-0 z-30">
             <div className="flex items-center gap-2">

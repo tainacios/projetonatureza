@@ -81,7 +81,7 @@ const Auth = () => {
           .from("user_roles")
           .select("role")
           .eq("user_id", signInData.user.id)
-          .eq("role", "admin")
+          .in("role", ["admin", "master_admin"])
           .maybeSingle(),
         supabase
           .from("ecopoints_terms_acceptance")
