@@ -54,6 +54,7 @@ const App = () => (
             <Route path="/admin/depoimentos" element={<AdminDepoimentos />} />
             <Route path="/admin/termos" element={<AdminTermos />} />
             <Route path="/admin/notificacoes" element={<AdminNotificacoes />} />
+            <Route path="/admin/permissoes" element={<AdminPermissoes />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
