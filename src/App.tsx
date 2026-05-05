@@ -23,6 +23,7 @@ import AdminGaleria from "./pages/admin/AdminGaleria.tsx";
 import AdminDepoimentos from "./pages/admin/AdminDepoimentos.tsx";
 import AdminTermos from "./pages/admin/AdminTermos.tsx";
 import AdminNotificacoes from "./pages/admin/AdminNotificacoes.tsx";
+import AdminPermissoes from "./pages/admin/AdminPermissoes.tsx";
 
 const queryClient = new QueryClient();
 
