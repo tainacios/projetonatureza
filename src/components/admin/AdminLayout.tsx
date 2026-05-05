@@ -46,7 +46,18 @@ const items: { title: string; url: string; icon: any; end?: boolean; perm: ItemP
   { title: "Permissões", url: "/admin/permissoes", icon: Shield, perm: "master" },
 ];
 
-const AdminSidebar = () => {
+const AdminSidebar = ({
+  permissions,
+  isMasterAdmin,
+}: {
+  permissions: { loja: boolean; galeria: boolean; depoimentos: boolean; acoes: boolean };
+  isMasterAdmin: boolean;
+}) => {
+  const visibleItems = items.filter((it) => {
+    if (it.perm === null) return true;
+    if (it.perm === "master") return isMasterAdmin;
+    return permissions[it.perm];
+  });
   const { pathname } = useLocation();
   return (
     <Sidebar collapsible="icon">
