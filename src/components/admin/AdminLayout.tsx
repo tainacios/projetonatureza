@@ -120,7 +120,7 @@ const AdminSidebar = ({
 
 export const AdminLayout = ({ children }: { children: ReactNode }) => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, isMasterAdmin, permissions, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
 
   if (authLoading || roleLoading) {
@@ -136,7 +136,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        <AdminSidebar />
+        <AdminSidebar permissions={permissions} isMasterAdmin={isMasterAdmin} />
         <div className="flex-1 flex flex-col">
           <header className="h-14 flex items-center justify-between border-b border-border/50 bg-background/80 backdrop-blur px-4 sticky top-0 z-30">
             <div className="flex items-center gap-2">
