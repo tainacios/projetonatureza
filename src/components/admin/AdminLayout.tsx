@@ -79,7 +79,7 @@ const AdminSidebar = ({
           <SidebarGroupLabel>Gestão</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => {
+              {visibleItems.map((item) => {
                 const active = item.end
                   ? pathname === item.url
                   : pathname.startsWith(item.url);
