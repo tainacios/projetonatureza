@@ -31,15 +31,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 
-const items = [
-  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true },
-  { title: "Voluntários", url: "/admin/voluntarios", icon: Users },
-  { title: "EcoPontos", url: "/admin/ecopontos", icon: Star },
-  { title: "Loja", url: "/admin/loja", icon: ShoppingBag },
-  { title: "Galeria", url: "/admin/galeria", icon: ImageIcon },
-  { title: "Depoimentos", url: "/admin/depoimentos", icon: MessageSquare },
-  { title: "Termos", url: "/admin/termos", icon: FileCheck },
-  { title: "Notificações", url: "/admin/notificacoes", icon: Bell },
+import { Shield } from "lucide-react";
+
+type ItemPerm = "loja" | "galeria" | "depoimentos" | "acoes" | "master" | null;
+const items: { title: string; url: string; icon: any; end?: boolean; perm: ItemPerm }[] = [
+  { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true, perm: null },
+  { title: "Voluntários", url: "/admin/voluntarios", icon: Users, perm: null },
+  { title: "EcoPontos", url: "/admin/ecopontos", icon: Star, perm: "acoes" },
+  { title: "Loja", url: "/admin/loja", icon: ShoppingBag, perm: "loja" },
+  { title: "Galeria", url: "/admin/galeria", icon: ImageIcon, perm: "galeria" },
+  { title: "Depoimentos", url: "/admin/depoimentos", icon: MessageSquare, perm: "depoimentos" },
+  { title: "Termos", url: "/admin/termos", icon: FileCheck, perm: null },
+  { title: "Notificações", url: "/admin/notificacoes", icon: Bell, perm: null },
+  { title: "Permissões", url: "/admin/permissoes", icon: Shield, perm: "master" },
 ];
 
 const AdminSidebar = () => {
