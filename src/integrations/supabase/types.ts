@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_permissions: {
+        Row: {
+          created_at: string
+          granted: boolean
+          id: string
+          module: Database["public"]["Enums"]["permission_module"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          module: Database["public"]["Enums"]["permission_module"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          module?: Database["public"]["Enums"]["permission_module"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ecopoints_terms_acceptance: {
         Row: {
           accepted: boolean
@@ -295,6 +322,13 @@ export type Database = {
         Args: { _terms_version?: string }
         Returns: boolean
       }
+      has_permission: {
+        Args: {
+          _module: Database["public"]["Enums"]["permission_module"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -305,6 +339,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "volunteer" | "master_admin"
+      permission_module: "loja" | "galeria" | "depoimentos" | "acoes"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -433,6 +468,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "volunteer", "master_admin"],
+      permission_module: ["loja", "galeria", "depoimentos", "acoes"],
     },
   },
 } as const
