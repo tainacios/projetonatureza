@@ -94,6 +94,27 @@ const AdminPermissoes = () => {
       toast.error("Erro ao definir cargo: " + insErr.message);
       return;
     }
+    if (newRole === "volunteer") {
+      // Remove todas as permissões granulares ao rebaixar para voluntário
+      const { error: permErr } = await supabase
+        .from("admin_permissions")
+        .delete()
+        .eq("user_id", userId);
+      if (permErr) {
+        toast.error("Erro ao limpar permissões: " + permErr.message);
+        return;
+      }
+    } else if (newRole === "admin") {
+      // Concede todas as permissões de módulo por padrão ao promover a admin
+      const rows = MODULES.map((m) => ({ user_id: userId, module: m, granted: true }));
+      const { error: permErr } = await supabase
+        .from("admin_permissions")
+        .upsert(rows, { onConflict: "user_id,module" });
+      if (permErr) {
+        toast.error("Erro ao conceder permissões: " + permErr.message);
+        return;
+      }
+    }
     toast.success("Cargo atualizado");
     load();
   };
