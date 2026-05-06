@@ -24,6 +24,8 @@ import AdminDepoimentos from "./pages/admin/AdminDepoimentos.tsx";
 import AdminTermos from "./pages/admin/AdminTermos.tsx";
 import AdminNotificacoes from "./pages/admin/AdminNotificacoes.tsx";
 import AdminPermissoes from "./pages/admin/AdminPermissoes.tsx";
+import AdminAcoes from "./pages/admin/AdminAcoes.tsx";
+import AdminCalendario from "./pages/admin/AdminCalendario.tsx";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,8 @@ const App = () => (
             <Route path="/admin/termos" element={<AdminTermos />} />
             <Route path="/admin/notificacoes" element={<AdminNotificacoes />} />
             <Route path="/admin/permissoes" element={<AdminPermissoes />} />
+            <Route path="/admin/acoes" element={<AdminAcoes />} />
+            <Route path="/admin/calendario" element={<AdminCalendario />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

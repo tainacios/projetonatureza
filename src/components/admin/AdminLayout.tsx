@@ -11,6 +11,8 @@ import {
   Bell,
   LogOut,
   Leaf,
+  HandHeart,
+  CalendarDays,
 } from "lucide-react";
 import {
   Sidebar,
@@ -37,6 +39,8 @@ type ItemPerm = "loja" | "galeria" | "depoimentos" | "acoes" | "master" | null;
 const items: { title: string; url: string; icon: any; end?: boolean; perm: ItemPerm }[] = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true, perm: null },
   { title: "Voluntários", url: "/admin/voluntarios", icon: Users, perm: null },
+  { title: "Ações", url: "/admin/acoes", icon: HandHeart, perm: "acoes" },
+  { title: "Calendário", url: "/admin/calendario", icon: CalendarDays, perm: "acoes" },
   { title: "EcoPontos", url: "/admin/ecopontos", icon: Star, perm: "acoes" },
   { title: "Loja", url: "/admin/loja", icon: ShoppingBag, perm: "loja" },
   { title: "Galeria", url: "/admin/galeria", icon: ImageIcon, perm: "galeria" },
