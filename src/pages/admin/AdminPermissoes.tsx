@@ -61,17 +61,18 @@ const AdminPermissoes = () => {
         roleMap.set(r.user_id, r.role);
       }
     });
+    const emptyPerms = (): Record<Module, boolean> => ({ loja: false, ecopontos: false, galeria: false, depoimentos: false, acoes: false });
     const permMap = new Map<string, Record<Module, boolean>>();
     (perms ?? []).forEach((p: any) => {
-      const cur = permMap.get(p.user_id) ?? { loja: false, galeria: false, depoimentos: false, acoes: false };
-      cur[p.module as Module] = !!p.granted;
+      const cur = permMap.get(p.user_id) ?? emptyPerms();
+      if (MODULES.includes(p.module)) cur[p.module as Module] = !!p.granted;
       permMap.set(p.user_id, cur);
     });
     const built: Row[] = (profiles ?? []).map((p: any) => ({
       user_id: p.id,
       full_name: p.full_name || "(sem nome)",
       role: roleMap.get(p.id) ?? "volunteer",
-      perms: permMap.get(p.id) ?? { loja: false, galeria: false, depoimentos: false, acoes: false },
+      perms: permMap.get(p.id) ?? emptyPerms(),
     }));
     setRows(built);
     setLoading(false);
