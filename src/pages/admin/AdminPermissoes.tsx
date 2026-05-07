@@ -24,10 +24,11 @@ import { Navigate } from "react-router-dom";
 import { Shield } from "lucide-react";
 
 type Role = "admin" | "master_admin" | "volunteer";
-type Module = "loja" | "galeria" | "depoimentos" | "acoes";
-const MODULES: Module[] = ["loja", "galeria", "depoimentos", "acoes"];
+type Module = "loja" | "galeria" | "depoimentos" | "acoes" | "ecopontos";
+const MODULES: Module[] = ["loja", "ecopontos", "galeria", "depoimentos", "acoes"];
 const MODULE_LABELS: Record<Module, string> = {
-  loja: "Loja/Pedidos",
+  loja: "Loja (itens)",
+  ecopontos: "EcoPontos",
   galeria: "Galeria",
   depoimentos: "Depoimentos",
   acoes: "Ações",
