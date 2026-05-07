@@ -2,18 +2,21 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type PermissionModule = "loja" | "galeria" | "depoimentos" | "acoes";
+export type PermissionModule = "loja" | "galeria" | "depoimentos" | "acoes" | "ecopontos";
+
+const EMPTY: Record<PermissionModule, boolean> = {
+  loja: false,
+  galeria: false,
+  depoimentos: false,
+  acoes: false,
+  ecopontos: false,
+};
 
 export const useUserRole = () => {
   const { user, loading: authLoading } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMasterAdmin, setIsMasterAdmin] = useState(false);
-  const [permissions, setPermissions] = useState<Record<PermissionModule, boolean>>({
-    loja: false,
-    galeria: false,
-    depoimentos: false,
-    acoes: false,
-  });
+  const [permissions, setPermissions] = useState<Record<PermissionModule, boolean>>({ ...EMPTY });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,7 +24,7 @@ export const useUserRole = () => {
     if (!user) {
       setIsAdmin(false);
       setIsMasterAdmin(false);
-      setPermissions({ loja: false, galeria: false, depoimentos: false, acoes: false });
+      setPermissions({ ...EMPTY });
       setLoading(false);
       return;
     }
@@ -43,6 +46,7 @@ export const useUserRole = () => {
         galeria: master,
         depoimentos: master,
         acoes: master,
+        ecopontos: master,
       };
       (perms ?? []).forEach((p: any) => {
         if (p.module in next) next[p.module as PermissionModule] = !!p.granted || master;
