@@ -35,13 +35,13 @@ import { cn } from "@/lib/utils";
 
 import { Shield } from "lucide-react";
 
-type ItemPerm = "loja" | "galeria" | "depoimentos" | "acoes" | "master" | null;
+type ItemPerm = "loja" | "galeria" | "depoimentos" | "acoes" | "ecopontos" | "master" | null;
 const items: { title: string; url: string; icon: any; end?: boolean; perm: ItemPerm }[] = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, end: true, perm: null },
   { title: "Voluntários", url: "/admin/voluntarios", icon: Users, perm: null },
   { title: "Ações", url: "/admin/acoes", icon: HandHeart, perm: "acoes" },
   { title: "Calendário", url: "/admin/calendario", icon: CalendarDays, perm: "acoes" },
-  { title: "EcoPontos", url: "/admin/ecopontos", icon: Star, perm: "acoes" },
+  { title: "EcoPontos", url: "/admin/ecopontos", icon: Star, perm: "ecopontos" },
   { title: "Loja", url: "/admin/loja", icon: ShoppingBag, perm: "loja" },
   { title: "Galeria", url: "/admin/galeria", icon: ImageIcon, perm: "galeria" },
   { title: "Depoimentos", url: "/admin/depoimentos", icon: MessageSquare, perm: "depoimentos" },
@@ -54,7 +54,7 @@ const AdminSidebar = ({
   permissions,
   isMasterAdmin,
 }: {
-  permissions: { loja: boolean; galeria: boolean; depoimentos: boolean; acoes: boolean };
+  permissions: { loja: boolean; galeria: boolean; depoimentos: boolean; acoes: boolean; ecopontos: boolean };
   isMasterAdmin: boolean;
 }) => {
   const visibleItems = items.filter((it) => {
