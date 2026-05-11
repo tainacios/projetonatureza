@@ -11,15 +11,12 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return json({ error: "Não autenticado" }, 401);
-    }
+    if (!authHeader) return json({ error: "Não autenticado" }, 401);
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Cliente do usuário (para validar JWT)
     const userClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -32,7 +29,6 @@ Deno.serve(async (req) => {
       return json({ error: "Recompensa inválida" }, 400);
     }
 
-    // Cliente admin (escrita segura)
     const admin = createClient(supabaseUrl, serviceKey);
 
     const [{ data: reward }, { data: profile }] = await Promise.all([
@@ -45,11 +41,9 @@ Deno.serve(async (req) => {
     if (profile.eco_points < reward.points_cost) {
       return json({ error: "EcoPontos insuficientes" }, 400);
     }
-    if (reward.stock <= 0) {
-      return json({ error: "Recompensa esgotada" }, 400);
-    }
+    if (reward.stock <= 0) return json({ error: "Recompensa esgotada" }, 400);
 
-    // Registra a troca (estrutura preparada — desconto de pontos pode ser ativado depois)
+    // Registra a troca
     const { data: redemption, error: redErr } = await admin
       .from("redemptions")
       .insert({
@@ -60,25 +54,47 @@ Deno.serve(async (req) => {
       })
       .select()
       .single();
-
     if (redErr) {
       console.error("Erro ao registrar troca:", redErr);
       return json({ error: "Falha ao registrar troca" }, 500);
     }
 
-    // Envio de email (estrutura pronta) — registramos a intenção no log do servidor
-    // Para envio real, configurar o domínio de email do projeto na Cloud.
-    const emailPayload = {
+    // Desconta pontos do perfil
+    const newPoints = profile.eco_points - reward.points_cost;
+    const { error: profErr } = await admin
+      .from("profiles")
+      .update({ eco_points: newPoints })
+      .eq("id", user.id);
+    if (profErr) {
+      console.error("Erro ao descontar pontos:", profErr);
+      // Reverte resgate
+      await admin.from("redemptions").delete().eq("id", redemption.id);
+      return json({ error: "Falha ao descontar pontos" }, 500);
+    }
+
+    // Decrementa estoque
+    await admin
+      .from("rewards")
+      .update({ stock: Math.max(0, reward.stock - 1) })
+      .eq("id", reward.id);
+
+    // Histórico
+    await admin.from("points_history").insert({
+      user_id: user.id,
+      amount: -reward.points_cost,
+      reason: "Resgate de recompensa",
+      action_name: reward.name,
+      created_by: user.id,
+    });
+
+    console.log("📧 Resgate concluído:", {
       to: user.email,
-      volunteerName: profile.full_name,
       rewardName: reward.name,
       pointsSpent: reward.points_cost,
-      currentPoints: profile.eco_points,
-      redemptionId: redemption.id,
-    };
-    console.log("📧 Email de troca pronto para envio:", emailPayload);
+      remaining: newPoints,
+    });
 
-    return json({ success: true, redemption });
+    return json({ success: true, redemption, eco_points: newPoints });
   } catch (e) {
     console.error("redeem-reward error:", e);
     return json({ error: "Erro inesperado" }, 500);

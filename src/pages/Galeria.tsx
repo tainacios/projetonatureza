@@ -114,11 +114,17 @@ const Galeria = () => {
       </section>
 
       <Dialog open={!!open} onOpenChange={(v) => !v && setOpen(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border-0 bg-transparent shadow-none">
+        <DialogContent className="max-w-4xl p-0 overflow-hidden border-0 bg-transparent shadow-none max-h-[92vh]">
           {open && (
-            <div className="relative">
-              <img src={open.image_url} alt={open.title} className="w-full h-auto rounded-3xl shadow-leaf" />
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-primary/90 to-transparent p-6 rounded-b-3xl">
+            <div className="relative flex flex-col max-h-[92vh] rounded-3xl overflow-hidden bg-background/40">
+              <div className="flex-1 min-h-0 flex items-center justify-center bg-black/40">
+                <img
+                  src={open.image_url}
+                  alt={open.title}
+                  className="max-h-[70vh] w-auto max-w-full object-contain"
+                />
+              </div>
+              <div className="bg-primary/90 backdrop-blur p-5 shrink-0">
                 <span className="inline-block bg-accent text-accent-foreground text-xs font-semibold px-2 py-1 rounded-full mb-2">
                   {CATEGORY_LABEL[open.category] || open.category}
                 </span>
