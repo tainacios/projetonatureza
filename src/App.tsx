@@ -26,6 +26,8 @@ import AdminNotificacoes from "./pages/admin/AdminNotificacoes.tsx";
 import AdminPermissoes from "./pages/admin/AdminPermissoes.tsx";
 import AdminAcoes from "./pages/admin/AdminAcoes.tsx";
 import AdminCalendario from "./pages/admin/AdminCalendario.tsx";
+import AdminFinanceiro from "./pages/admin/AdminFinanceiro.tsx";
+import { OverdueDonationsBanner } from "./components/OverdueDonationsBanner.tsx";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +38,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <OverdueDonationsBanner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/sobre" element={<Sobre />} />
@@ -59,6 +62,7 @@ const App = () => (
             <Route path="/admin/permissoes" element={<AdminPermissoes />} />
             <Route path="/admin/acoes" element={<AdminAcoes />} />
             <Route path="/admin/calendario" element={<AdminCalendario />} />
+            <Route path="/admin/financeiro" element={<AdminFinanceiro />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
