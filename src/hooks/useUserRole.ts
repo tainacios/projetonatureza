@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type PermissionModule = "loja" | "galeria" | "depoimentos" | "acoes" | "ecopontos";
+export type PermissionModule = "loja" | "galeria" | "depoimentos" | "acoes" | "ecopontos" | "financeiro";
 
 const EMPTY: Record<PermissionModule, boolean> = {
   loja: false,
@@ -10,6 +10,7 @@ const EMPTY: Record<PermissionModule, boolean> = {
   depoimentos: false,
   acoes: false,
   ecopontos: false,
+  financeiro: false,
 };
 
 export const useUserRole = () => {
@@ -47,6 +48,7 @@ export const useUserRole = () => {
         depoimentos: master,
         acoes: master,
         ecopontos: master,
+        financeiro: master,
       };
       (perms ?? []).forEach((p: any) => {
         if (p.module in next) next[p.module as PermissionModule] = !!p.granted || master;

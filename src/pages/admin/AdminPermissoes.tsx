@@ -24,11 +24,12 @@ import { Navigate } from "react-router-dom";
 import { Shield } from "lucide-react";
 
 type Role = "admin" | "master_admin" | "volunteer";
-type Module = "loja" | "galeria" | "depoimentos" | "acoes" | "ecopontos";
-const MODULES: Module[] = ["loja", "ecopontos", "galeria", "depoimentos", "acoes"];
+type Module = "loja" | "galeria" | "depoimentos" | "acoes" | "ecopontos" | "financeiro";
+const MODULES: Module[] = ["loja", "ecopontos", "financeiro", "galeria", "depoimentos", "acoes"];
 const MODULE_LABELS: Record<Module, string> = {
   loja: "Loja (itens)",
   ecopontos: "EcoPontos",
+  financeiro: "Financeiro",
   galeria: "Galeria",
   depoimentos: "Depoimentos",
   acoes: "Ações",
@@ -61,7 +62,7 @@ const AdminPermissoes = () => {
         roleMap.set(r.user_id, r.role);
       }
     });
-    const emptyPerms = (): Record<Module, boolean> => ({ loja: false, ecopontos: false, galeria: false, depoimentos: false, acoes: false });
+    const emptyPerms = (): Record<Module, boolean> => ({ loja: false, ecopontos: false, financeiro: false, galeria: false, depoimentos: false, acoes: false });
     const permMap = new Map<string, Record<Module, boolean>>();
     (perms ?? []).forEach((p: any) => {
       const cur = permMap.get(p.user_id) ?? emptyPerms();
