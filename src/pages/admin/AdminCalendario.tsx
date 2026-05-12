@@ -176,7 +176,12 @@ const AdminCalendario = () => {
                     <CardContent className="p-3 space-y-1">
                       <div className="flex justify-between gap-2">
                         <div className="font-medium">{a.title}</div>
-                        <span className="text-[10px] uppercase bg-muted px-2 py-0.5 rounded">{a.tag}</span>
+                        <div className="flex gap-1">
+                          <span className={`text-[10px] uppercase px-2 py-0.5 rounded ${a.kind === "action" ? "bg-accent/20 text-accent" : "bg-muted"}`}>
+                            {a.kind === "action" ? "Ação" : "Evento"}
+                          </span>
+                          <span className="text-[10px] uppercase bg-muted px-2 py-0.5 rounded">{a.tag}</span>
+                        </div>
                       </div>
                       <div className="text-xs text-muted-foreground flex gap-3 flex-wrap">
                         <span className="flex items-center gap-1"><CalIcon className="h-3 w-3" />
