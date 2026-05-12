@@ -21,6 +21,7 @@ export type Database = {
           description: string
           id: string
           image_url: string | null
+          kind: Database["public"]["Enums"]["action_kind"]
           location: string | null
           published: boolean
           scheduled_at: string | null
@@ -35,6 +36,7 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          kind?: Database["public"]["Enums"]["action_kind"]
           location?: string | null
           published?: boolean
           scheduled_at?: string | null
@@ -49,6 +51,7 @@ export type Database = {
           description?: string
           id?: string
           image_url?: string | null
+          kind?: Database["public"]["Enums"]["action_kind"]
           location?: string | null
           published?: boolean
           scheduled_at?: string | null
@@ -452,6 +455,7 @@ export type Database = {
       }
     }
     Enums: {
+      action_kind: "action" | "event"
       app_role: "admin" | "volunteer" | "master_admin"
       permission_module:
         | "loja"
@@ -587,6 +591,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      action_kind: ["action", "event"],
       app_role: ["admin", "volunteer", "master_admin"],
       permission_module: [
         "loja",
