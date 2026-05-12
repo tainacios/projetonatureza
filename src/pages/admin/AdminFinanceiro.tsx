@@ -20,7 +20,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
 import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Plus, Wallet, AlertTriangle, CheckCircle2, Pencil } from "lucide-react";
+import { Plus, Wallet, AlertTriangle, CheckCircle2, Pencil, Trash2, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 
 interface Profile { id: string; full_name: string }
 interface Pledge {
@@ -32,10 +32,14 @@ interface Donation {
   paid_at: string | null; status: string; notes: string | null;
   full_name?: string;
 }
+interface TreasuryTx {
+  id: string; kind: "income" | "expense"; amount: number;
+  category: string; description: string | null; occurred_at: string;
+}
 
-const STATUSES = ["pending", "paid", "cancelled"] as const;
+const STATUSES = ["pending", "paid", "overdue", "cancelled"] as const;
 const STATUS_LABEL: Record<string, string> = {
-  pending: "Pendente", paid: "Pago", cancelled: "Cancelado",
+  pending: "Pendente", paid: "Pago", overdue: "Inadimplente", cancelled: "Cancelado",
 };
 
 const monthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-01`;
@@ -46,12 +50,19 @@ const monthLabel = (s: string) => {
 const fmtMoney = (n: number) =>
   new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(Number(n) || 0);
 
+const statusClass = (s: string) =>
+  s === "paid" ? "text-primary font-semibold" :
+  s === "overdue" ? "text-destructive font-semibold" :
+  s === "cancelled" ? "text-muted-foreground" :
+  "text-amber-600 font-semibold";
+
 const AdminFinanceiro = () => {
   const { user } = useAuth();
   const { permissions, loading: roleLoading } = useUserRole();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [pledges, setPledges] = useState<Pledge[]>([]);
   const [donations, setDonations] = useState<Donation[]>([]);
+  const [treasury, setTreasury] = useState<TreasuryTx[]>([]);
   const [month, setMonth] = useState<string>(monthKey(new Date()));
 
   const [pledgeOpen, setPledgeOpen] = useState(false);
@@ -64,16 +75,26 @@ const AdminFinanceiro = () => {
     status: "pending", paid_at: "", notes: "",
   });
 
+  const [txOpen, setTxOpen] = useState(false);
+  const [txEditing, setTxEditing] = useState<TreasuryTx | null>(null);
+  const [txForm, setTxForm] = useState({
+    kind: "income" as "income" | "expense",
+    amount: "", category: "geral", description: "",
+    occurred_at: new Date().toISOString().slice(0, 10),
+  });
+
   const load = async () => {
-    const [{ data: p }, { data: pl }, { data: dn }] = await Promise.all([
+    const [{ data: p }, { data: pl }, { data: dn }, { data: tx }] = await Promise.all([
       supabase.from("profiles").select("id, full_name").order("full_name"),
       supabase.from("donor_pledges" as any).select("*"),
       supabase.from("donations" as any).select("*").order("reference_month", { ascending: false }),
+      supabase.from("treasury_transactions" as any).select("*").order("occurred_at", { ascending: false }),
     ]);
     setProfiles((p as Profile[]) ?? []);
     const map = new Map((p ?? []).map((x: any) => [x.id, x.full_name]));
     setPledges(((pl as any) ?? []).map((x: any) => ({ ...x, full_name: map.get(x.user_id) })));
     setDonations(((dn as any) ?? []).map((x: any) => ({ ...x, full_name: map.get(x.user_id) })));
+    setTreasury((tx as any) ?? []);
   };
   useEffect(() => { if (!roleLoading && permissions.financeiro) load(); }, [roleLoading, permissions.financeiro]);
 
@@ -88,21 +109,48 @@ const AdminFinanceiro = () => {
     .filter((p) => p.active)
     .reduce((s, p) => s + Number(p.monthly_amount), 0);
 
-  // Inadimplentes do mês selecionado: pledge ativo e sem doação 'paid' naquele mês
-  const overdueRows = useMemo(() => {
-    const paidByUser = new Set(
-      monthDonations.filter((d) => d.status === "paid").map((d) => d.user_id)
-    );
-    return pledges
-      .filter((p) => p.active && !paidByUser.has(p.user_id))
-      .map((p) => ({
-        ...p,
-        donation: monthDonations.find((d) => d.user_id === p.user_id) || null,
-      }));
-  }, [pledges, monthDonations]);
+  // Status do mês para o usuário (considera vencimento)
+  const monthIsCurrentOrPast = (() => {
+    const now = new Date();
+    const ref = new Date(month);
+    return ref.getFullYear() < now.getFullYear() ||
+      (ref.getFullYear() === now.getFullYear() && ref.getMonth() <= now.getMonth());
+  })();
+  const today = new Date();
+
+  const computeUserStatus = (userId: string) => {
+    const donation = monthDonations.find((d) => d.user_id === userId);
+    const pledge = pledges.find((p) => p.user_id === userId && p.active);
+    if (donation) return { donation, pledge, status: donation.status };
+    // Sem registro: se mês passou ou está vencido neste mês, marca como overdue
+    const ref = new Date(month);
+    const isPastMonth = ref.getFullYear() < today.getFullYear() ||
+      (ref.getFullYear() === today.getFullYear() && ref.getMonth() < today.getMonth());
+    const dueDay = pledge?.due_day ?? 10;
+    const isOverdueThisMonth =
+      ref.getFullYear() === today.getFullYear() &&
+      ref.getMonth() === today.getMonth() &&
+      today.getDate() > dueDay;
+    const status = (isPastMonth || isOverdueThisMonth) && pledge ? "overdue" : "pending";
+    return { donation: null as Donation | null, pledge, status };
+  };
+
+  const overdueCount = useMemo(
+    () => profiles.filter((u) => computeUserStatus(u.id).status === "overdue").length,
+    [profiles, monthDonations, pledges, month]
+  );
+
+  // Tesouraria — totais filtrados pelo mês selecionado
+  const monthTreasury = useMemo(
+    () => treasury.filter((t) => t.occurred_at.startsWith(month.slice(0, 7))),
+    [treasury, month]
+  );
+  const treasuryIncome = monthTreasury.filter((t) => t.kind === "income").reduce((s, t) => s + Number(t.amount), 0);
+  const treasuryExpense = monthTreasury.filter((t) => t.kind === "expense").reduce((s, t) => s + Number(t.amount), 0);
+  const treasuryBalance = treasuryIncome - treasuryExpense;
 
   const submitPledge = async () => {
-    if (!pledgeForm.user_id || !pledgeForm.monthly_amount) return toast.error("Preencha voluntário e valor");
+    if (!pledgeForm.user_id || !pledgeForm.monthly_amount) return toast.error("Preencha doador e valor");
     const payload = {
       user_id: pledgeForm.user_id,
       monthly_amount: Number(pledgeForm.monthly_amount),
@@ -129,14 +177,14 @@ const AdminFinanceiro = () => {
     setPledgeOpen(true);
   };
 
-  const openNewDonation = (userId?: string, amount?: number) => {
+  const openNewDonation = (userId?: string, amount?: number, status: string = "paid") => {
     setDonEditing(null);
     setDonForm({
       user_id: userId ?? "",
       amount: amount ? String(amount) : "",
       reference_month: month,
-      status: "paid",
-      paid_at: new Date().toISOString().slice(0, 10),
+      status,
+      paid_at: status === "paid" ? new Date().toISOString().slice(0, 10) : "",
       notes: "",
     });
     setDonOpen(true);
@@ -156,7 +204,7 @@ const AdminFinanceiro = () => {
 
   const submitDonation = async () => {
     if (!donForm.user_id || !donForm.amount || !donForm.reference_month) {
-      return toast.error("Preencha voluntário, valor e mês");
+      return toast.error("Preencha doador, valor e mês");
     }
     const payload: any = {
       user_id: donForm.user_id,
@@ -178,12 +226,57 @@ const AdminFinanceiro = () => {
     setDonOpen(false); load();
   };
 
+  const openNewTx = (kind: "income" | "expense") => {
+    setTxEditing(null);
+    setTxForm({
+      kind, amount: "", category: "geral", description: "",
+      occurred_at: new Date().toISOString().slice(0, 10),
+    });
+    setTxOpen(true);
+  };
+  const openEditTx = (t: TreasuryTx) => {
+    setTxEditing(t);
+    setTxForm({
+      kind: t.kind,
+      amount: String(t.amount),
+      category: t.category,
+      description: t.description || "",
+      occurred_at: t.occurred_at.slice(0, 10),
+    });
+    setTxOpen(true);
+  };
+  const submitTx = async () => {
+    if (!txForm.amount || Number(txForm.amount) <= 0) return toast.error("Informe um valor válido");
+    const payload: any = {
+      kind: txForm.kind,
+      amount: Number(txForm.amount),
+      category: txForm.category || "geral",
+      description: txForm.description || null,
+      occurred_at: txForm.occurred_at,
+    };
+    if (txEditing) {
+      const { error } = await supabase.from("treasury_transactions" as any).update(payload).eq("id", txEditing.id);
+      if (error) return toast.error(error.message);
+    } else {
+      payload.created_by = user?.id;
+      const { error } = await supabase.from("treasury_transactions" as any).insert(payload);
+      if (error) return toast.error(error.message);
+    }
+    toast.success("Lançamento salvo");
+    setTxOpen(false); load();
+  };
+  const deleteTx = async (id: string) => {
+    if (!confirm("Excluir este lançamento?")) return;
+    const { error } = await supabase.from("treasury_transactions" as any).delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    toast.success("Lançamento excluído"); load();
+  };
+
   if (roleLoading) {
     return <AdminLayout><div className="text-muted-foreground">Carregando...</div></AdminLayout>;
   }
   if (!permissions.financeiro) return <Navigate to="/admin" replace />;
 
-  // Lista de meses para filtro (últimos 12)
   const months: string[] = [];
   const now = new Date();
   for (let i = 0; i < 12; i++) {
@@ -199,7 +292,7 @@ const AdminFinanceiro = () => {
             <h1 className="font-display text-3xl font-bold text-primary flex items-center gap-2">
               <Wallet className="h-7 w-7" /> Financeiro
             </h1>
-            <p className="text-muted-foreground">Doações mensais e inadimplência</p>
+            <p className="text-muted-foreground">Doadores, transações e tesouraria</p>
           </div>
           <div className="flex gap-2">
             <Select value={month} onValueChange={setMonth}>
@@ -210,15 +303,12 @@ const AdminFinanceiro = () => {
                 ))}
               </SelectContent>
             </Select>
-            <Button onClick={() => openNewDonation()}>
-              <Plus className="h-4 w-4 mr-2" /> Registrar doação
-            </Button>
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-4">
+        <div className="grid sm:grid-cols-4 gap-4">
           <Card><CardContent className="p-4">
-            <div className="text-sm text-muted-foreground">Recebido no mês</div>
+            <div className="text-sm text-muted-foreground">Recebido (doações)</div>
             <div className="text-2xl font-bold text-primary">{fmtMoney(totalMonth)}</div>
           </CardContent></Card>
           <Card><CardContent className="p-4">
@@ -227,66 +317,30 @@ const AdminFinanceiro = () => {
           </CardContent></Card>
           <Card><CardContent className="p-4">
             <div className="text-sm text-muted-foreground">Inadimplentes</div>
-            <div className="text-2xl font-bold text-destructive">{overdueRows.length}</div>
+            <div className="text-2xl font-bold text-destructive">{overdueCount}</div>
+          </CardContent></Card>
+          <Card><CardContent className="p-4">
+            <div className="text-sm text-muted-foreground">Saldo de caixa (mês)</div>
+            <div className={`text-2xl font-bold ${treasuryBalance >= 0 ? "text-primary" : "text-destructive"}`}>
+              {fmtMoney(treasuryBalance)}
+            </div>
           </CardContent></Card>
         </div>
 
-        <Tabs defaultValue="mes">
+        <Tabs defaultValue="doadores">
           <TabsList>
-            <TabsTrigger value="mes">Doações do mês</TabsTrigger>
-            <TabsTrigger value="inadimplentes">Inadimplentes</TabsTrigger>
+            <TabsTrigger value="doadores">Doadores</TabsTrigger>
+            <TabsTrigger value="historico">Histórico de transações</TabsTrigger>
+            <TabsTrigger value="tesouraria">Tesouraria</TabsTrigger>
             <TabsTrigger value="pledges">Compromissos</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="mes">
-            <Card>
-              <CardContent className="p-0 overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Voluntário</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Pago em</TableHead>
-                      <TableHead>Obs.</TableHead>
-                      <TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {monthDonations.map((d) => (
-                      <TableRow key={d.id}>
-                        <TableCell>{d.full_name || "—"}</TableCell>
-                        <TableCell className="font-bold">{fmtMoney(Number(d.amount))}</TableCell>
-                        <TableCell>
-                          <span className={
-                            d.status === "paid" ? "text-primary font-semibold" :
-                            d.status === "cancelled" ? "text-muted-foreground" :
-                            "text-destructive font-semibold"
-                          }>{STATUS_LABEL[d.status]}</span>
-                        </TableCell>
-                        <TableCell>{d.paid_at ? new Date(d.paid_at).toLocaleDateString("pt-BR") : "—"}</TableCell>
-                        <TableCell className="text-muted-foreground text-xs">{d.notes || ""}</TableCell>
-                        <TableCell>
-                          <Button size="sm" variant="ghost" onClick={() => openEditDonation(d)}>
-                            <Pencil className="h-3 w-3" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {monthDonations.length === 0 && (
-                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Sem doações neste mês.</TableCell></TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="inadimplentes" className="space-y-6">
+          {/* DOADORES */}
+          <TabsContent value="doadores" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-5 w-5" /> Doadores em {monthLabel(month)}
+                <CardTitle className="flex items-center gap-2 text-primary">
+                  <Wallet className="h-5 w-5" /> Doadores em {monthLabel(month)}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Todos os usuários cadastrados são considerados doadores. Marque o pagamento ou registre como inadimplente.
@@ -304,9 +358,7 @@ const AdminFinanceiro = () => {
                   </TableHeader>
                   <TableBody>
                     {profiles.map((u) => {
-                      const pledge = pledges.find((p) => p.user_id === u.id && p.active);
-                      const donation = monthDonations.find((d) => d.user_id === u.id);
-                      const isOverdue = !donation || donation.status !== "paid";
+                      const { donation, pledge, status } = computeUserStatus(u.id);
                       return (
                         <TableRow key={u.id}>
                           <TableCell>{u.full_name || "(sem nome)"}</TableCell>
@@ -316,19 +368,11 @@ const AdminFinanceiro = () => {
                               : <span className="text-muted-foreground text-xs">Sem compromisso</span>}
                           </TableCell>
                           <TableCell>
-                            {donation ? (
-                              <span className={
-                                donation.status === "paid" ? "text-primary font-semibold" :
-                                donation.status === "cancelled" ? "text-muted-foreground" :
-                                "text-destructive font-semibold"
-                              }>{STATUS_LABEL[donation.status]}</span>
-                            ) : (
-                              <span className="text-destructive">Sem registro</span>
-                            )}
+                            <span className={statusClass(status)}>{STATUS_LABEL[status]}</span>
                           </TableCell>
                           <TableCell className="space-x-1 whitespace-nowrap">
-                            {isOverdue && (
-                              <Button size="sm" variant="outline" onClick={() => openNewDonation(u.id, pledge ? Number(pledge.monthly_amount) : undefined)}>
+                            {status !== "paid" && (
+                              <Button size="sm" variant="outline" onClick={() => openNewDonation(u.id, pledge ? Number(pledge.monthly_amount) : undefined, "paid")}>
                                 <CheckCircle2 className="h-3 w-3 mr-1" /> Marcar pago
                               </Button>
                             )}
@@ -339,7 +383,7 @@ const AdminFinanceiro = () => {
                                   user_id: u.id,
                                   amount,
                                   reference_month: month,
-                                  status: "pending",
+                                  status: "overdue",
                                   paid_at: null,
                                   created_by: user?.id,
                                 }, { onConflict: "user_id,reference_month" });
@@ -410,6 +454,133 @@ const AdminFinanceiro = () => {
             </Card>
           </TabsContent>
 
+          {/* HISTÓRICO DE TRANSAÇÕES (DOAÇÕES) */}
+          <TabsContent value="historico">
+            <Card>
+              <CardHeader className="flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Histórico de transações</CardTitle>
+                  <p className="text-sm text-muted-foreground">Doações registradas em {monthLabel(month)}.</p>
+                </div>
+                <Button onClick={() => openNewDonation()}>
+                  <Plus className="h-4 w-4 mr-2" /> Registrar doação
+                </Button>
+              </CardHeader>
+              <CardContent className="p-0 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Doador</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Pago em</TableHead>
+                      <TableHead>Obs.</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthDonations.map((d) => (
+                      <TableRow key={d.id}>
+                        <TableCell>{d.full_name || "—"}</TableCell>
+                        <TableCell className="font-bold">{fmtMoney(Number(d.amount))}</TableCell>
+                        <TableCell><span className={statusClass(d.status)}>{STATUS_LABEL[d.status]}</span></TableCell>
+                        <TableCell>{d.paid_at ? new Date(d.paid_at).toLocaleDateString("pt-BR") : "—"}</TableCell>
+                        <TableCell className="text-muted-foreground text-xs">{d.notes || ""}</TableCell>
+                        <TableCell>
+                          <Button size="sm" variant="ghost" onClick={() => openEditDonation(d)}>
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {monthDonations.length === 0 && (
+                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Sem transações neste mês.</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* TESOURARIA */}
+          <TabsContent value="tesouraria">
+            <div className="grid sm:grid-cols-3 gap-4 mb-4">
+              <Card><CardContent className="p-4">
+                <div className="text-sm text-muted-foreground">Entradas no mês</div>
+                <div className="text-2xl font-bold text-primary">{fmtMoney(treasuryIncome)}</div>
+              </CardContent></Card>
+              <Card><CardContent className="p-4">
+                <div className="text-sm text-muted-foreground">Saídas no mês</div>
+                <div className="text-2xl font-bold text-destructive">{fmtMoney(treasuryExpense)}</div>
+              </CardContent></Card>
+              <Card><CardContent className="p-4">
+                <div className="text-sm text-muted-foreground">Saldo do mês</div>
+                <div className={`text-2xl font-bold ${treasuryBalance >= 0 ? "text-primary" : "text-destructive"}`}>
+                  {fmtMoney(treasuryBalance)}
+                </div>
+              </CardContent></Card>
+            </div>
+            <Card>
+              <CardHeader className="flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Tesouraria do projeto</CardTitle>
+                  <p className="text-sm text-muted-foreground">Controle de entradas e saídas do caixa.</p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => openNewTx("income")}>
+                    <ArrowDownCircle className="h-4 w-4 mr-1" /> Nova entrada
+                  </Button>
+                  <Button variant="outline" onClick={() => openNewTx("expense")}>
+                    <ArrowUpCircle className="h-4 w-4 mr-1" /> Nova saída
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Data</TableHead>
+                      <TableHead>Tipo</TableHead>
+                      <TableHead>Categoria</TableHead>
+                      <TableHead>Descrição</TableHead>
+                      <TableHead>Valor</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {monthTreasury.map((t) => (
+                      <TableRow key={t.id}>
+                        <TableCell>{new Date(t.occurred_at).toLocaleDateString("pt-BR")}</TableCell>
+                        <TableCell>
+                          <span className={t.kind === "income" ? "text-primary font-semibold" : "text-destructive font-semibold"}>
+                            {t.kind === "income" ? "Entrada" : "Saída"}
+                          </span>
+                        </TableCell>
+                        <TableCell className="capitalize">{t.category}</TableCell>
+                        <TableCell className="text-muted-foreground text-xs">{t.description || ""}</TableCell>
+                        <TableCell className={`font-bold ${t.kind === "income" ? "text-primary" : "text-destructive"}`}>
+                          {t.kind === "income" ? "+" : "−"} {fmtMoney(Number(t.amount))}
+                        </TableCell>
+                        <TableCell className="space-x-1 whitespace-nowrap">
+                          <Button size="sm" variant="ghost" onClick={() => openEditTx(t)}>
+                            <Pencil className="h-3 w-3" />
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => deleteTx(t.id)}>
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {monthTreasury.length === 0 && (
+                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">Sem lançamentos neste mês.</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* COMPROMISSOS */}
           <TabsContent value="pledges">
             <Card>
               <CardHeader className="flex-row items-center justify-between">
@@ -422,7 +593,7 @@ const AdminFinanceiro = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Voluntário</TableHead>
+                      <TableHead>Doador</TableHead>
                       <TableHead>Valor mensal</TableHead>
                       <TableHead>Dia venc.</TableHead>
                       <TableHead>Ativo</TableHead>
@@ -459,7 +630,7 @@ const AdminFinanceiro = () => {
             <DialogHeader><DialogTitle>Compromisso mensal</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div>
-                <Label>Voluntário</Label>
+                <Label>Doador</Label>
                 <Select value={pledgeForm.user_id} onValueChange={(v) => setPledgeForm({ ...pledgeForm, user_id: v })}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
@@ -504,7 +675,7 @@ const AdminFinanceiro = () => {
             </DialogHeader>
             <div className="space-y-3">
               <div>
-                <Label>Voluntário</Label>
+                <Label>Doador</Label>
                 <Select value={donForm.user_id} onValueChange={(v) => setDonForm({ ...donForm, user_id: v })}>
                   <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
                   <SelectContent>
@@ -552,6 +723,56 @@ const AdminFinanceiro = () => {
             <DialogFooter>
               <Button variant="outline" onClick={() => setDonOpen(false)}>Cancelar</Button>
               <Button onClick={submitDonation}>Salvar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Dialog Treasury */}
+        <Dialog open={txOpen} onOpenChange={setTxOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{txEditing ? "Editar lançamento" : (txForm.kind === "income" ? "Nova entrada" : "Nova saída")}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Tipo</Label>
+                  <Select value={txForm.kind} onValueChange={(v: "income" | "expense") => setTxForm({ ...txForm, kind: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="income">Entrada</SelectItem>
+                      <SelectItem value="expense">Saída</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Data</Label>
+                  <Input type="date" value={txForm.occurred_at}
+                    onChange={(e) => setTxForm({ ...txForm, occurred_at: e.target.value })} />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Valor (R$)</Label>
+                  <Input type="number" step="0.01" value={txForm.amount}
+                    onChange={(e) => setTxForm({ ...txForm, amount: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Categoria</Label>
+                  <Input value={txForm.category}
+                    onChange={(e) => setTxForm({ ...txForm, category: e.target.value })}
+                    placeholder="Ex: doação, material, transporte" />
+                </div>
+              </div>
+              <div>
+                <Label>Descrição</Label>
+                <Textarea value={txForm.description}
+                  onChange={(e) => setTxForm({ ...txForm, description: e.target.value })} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setTxOpen(false)}>Cancelar</Button>
+              <Button onClick={submitTx}>Salvar</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
