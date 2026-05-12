@@ -204,16 +204,21 @@ const AdminCalendario = () => {
             </div>
 
             <div>
-              <h2 className="font-semibold text-primary mb-2">Próximas ações</h2>
+              <h2 className="font-semibold text-primary mb-2">Próximos compromissos</h2>
               <div className="space-y-2">
-                {upcoming.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma ação futura.</p>}
+                {upcoming.length === 0 && <p className="text-sm text-muted-foreground">Nenhum compromisso futuro.</p>}
                 {upcoming.map((a) => (
                   <button
                     key={a.id}
                     onClick={() => openEdit(a)}
-                    className="w-full text-left flex justify-between text-sm p-2 rounded hover:bg-muted/40"
+                    className="w-full text-left flex justify-between items-center text-sm p-2 rounded hover:bg-muted/40"
                   >
-                    <span>{a.title}</span>
+                    <span className="flex items-center gap-2">
+                      <span className={`text-[9px] uppercase px-1.5 py-0.5 rounded ${a.kind === "action" ? "bg-accent/20 text-accent" : "bg-muted"}`}>
+                        {a.kind === "action" ? "Ação" : "Evento"}
+                      </span>
+                      {a.title}
+                    </span>
                     <span className="text-muted-foreground">
                       {new Date(a.scheduled_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" })}
                     </span>
@@ -227,9 +232,23 @@ const AdminCalendario = () => {
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) reset(); }}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editing ? "Editar evento" : "Novo evento"}</DialogTitle>
+              <DialogTitle>{editing ? "Editar compromisso" : "Novo compromisso"}</DialogTitle>
             </DialogHeader>
             <div className="space-y-3 max-h-[70vh] overflow-y-auto">
+              <div>
+                <Label>Tipo</Label>
+                <select
+                  className="w-full h-10 rounded-md border bg-background px-3 text-sm"
+                  value={form.kind}
+                  onChange={(e) => setForm({ ...form, kind: e.target.value as "event" | "action" })}
+                >
+                  <option value="event">Evento / reunião (privado)</option>
+                  <option value="action">Ação pública (aparece no site)</option>
+                </select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Eventos ficam apenas no calendário interno. Ações aparecem na página pública de Ações.
+                </p>
+              </div>
               <div>
                 <Label>Título</Label>
                 <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
