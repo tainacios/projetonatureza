@@ -282,44 +282,127 @@ const AdminFinanceiro = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="inadimplentes">
+          <TabsContent value="inadimplentes" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-destructive">
-                  <AlertTriangle className="h-5 w-5" /> Inadimplentes em {monthLabel(month)}
+                  <AlertTriangle className="h-5 w-5" /> Doadores em {monthLabel(month)}
                 </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Todos os usuários cadastrados são considerados doadores. Marque o pagamento ou registre como inadimplente.
+                </p>
               </CardHeader>
               <CardContent className="p-0 overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Voluntário</TableHead>
+                      <TableHead>Doador</TableHead>
+                      <TableHead>Compromisso</TableHead>
+                      <TableHead>Status do mês</TableHead>
+                      <TableHead></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {profiles.map((u) => {
+                      const pledge = pledges.find((p) => p.user_id === u.id && p.active);
+                      const donation = monthDonations.find((d) => d.user_id === u.id);
+                      const isOverdue = !donation || donation.status !== "paid";
+                      return (
+                        <TableRow key={u.id}>
+                          <TableCell>{u.full_name || "(sem nome)"}</TableCell>
+                          <TableCell>
+                            {pledge
+                              ? <span>{fmtMoney(Number(pledge.monthly_amount))} · dia {pledge.due_day}</span>
+                              : <span className="text-muted-foreground text-xs">Sem compromisso</span>}
+                          </TableCell>
+                          <TableCell>
+                            {donation ? (
+                              <span className={
+                                donation.status === "paid" ? "text-primary font-semibold" :
+                                donation.status === "cancelled" ? "text-muted-foreground" :
+                                "text-destructive font-semibold"
+                              }>{STATUS_LABEL[donation.status]}</span>
+                            ) : (
+                              <span className="text-destructive">Sem registro</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="space-x-1 whitespace-nowrap">
+                            {isOverdue && (
+                              <Button size="sm" variant="outline" onClick={() => openNewDonation(u.id, pledge ? Number(pledge.monthly_amount) : undefined)}>
+                                <CheckCircle2 className="h-3 w-3 mr-1" /> Marcar pago
+                              </Button>
+                            )}
+                            {!donation && (
+                              <Button size="sm" variant="ghost" onClick={async () => {
+                                const amount = pledge ? Number(pledge.monthly_amount) : 0;
+                                const { error } = await supabase.from("donations" as any).upsert({
+                                  user_id: u.id,
+                                  amount,
+                                  reference_month: month,
+                                  status: "pending",
+                                  paid_at: null,
+                                  created_by: user?.id,
+                                }, { onConflict: "user_id,reference_month" });
+                                if (error) return toast.error(error.message);
+                                toast.success("Inadimplência registrada"); load();
+                              }}>
+                                <AlertTriangle className="h-3 w-3 mr-1" /> Registrar inadimplência
+                              </Button>
+                            )}
+                            {donation && (
+                              <Button size="sm" variant="ghost" onClick={() => openEditDonation(donation)}>
+                                <Pencil className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    {profiles.length === 0 && (
+                      <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6">Nenhum usuário cadastrado.</TableCell></TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Padrinhos do projeto</CardTitle>
+                  <p className="text-sm text-muted-foreground">Doadores com compromisso mensal ativo.</p>
+                </div>
+                <Button size="sm" onClick={() => { setPledgeForm({ user_id: "", monthly_amount: "", due_day: "10", active: true }); setPledgeOpen(true); }}>
+                  <Plus className="h-4 w-4 mr-1" /> Adicionar padrinho
+                </Button>
+              </CardHeader>
+              <CardContent className="p-0 overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Padrinho</TableHead>
                       <TableHead>Valor mensal</TableHead>
-                      <TableHead>Vencimento</TableHead>
+                      <TableHead>Dia venc.</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {overdueRows.map((p) => (
+                    {pledges.filter((p) => p.active).map((p) => (
                       <TableRow key={p.id}>
                         <TableCell>{p.full_name}</TableCell>
-                        <TableCell>{fmtMoney(Number(p.monthly_amount))}</TableCell>
+                        <TableCell className="font-bold">{fmtMoney(Number(p.monthly_amount))}</TableCell>
                         <TableCell>Dia {p.due_day}</TableCell>
+                        <TableCell><span className="text-primary">Ativo</span></TableCell>
                         <TableCell>
-                          {p.donation
-                            ? <span className="text-destructive">{STATUS_LABEL[p.donation.status]}</span>
-                            : <span className="text-destructive">Sem registro</span>}
-                        </TableCell>
-                        <TableCell>
-                          <Button size="sm" variant="outline" onClick={() => openNewDonation(p.user_id, Number(p.monthly_amount))}>
-                            <CheckCircle2 className="h-3 w-3 mr-1" /> Marcar pago
+                          <Button size="sm" variant="ghost" onClick={() => editPledge(p)}>
+                            <Pencil className="h-3 w-3" />
                           </Button>
                         </TableCell>
                       </TableRow>
                     ))}
-                    {overdueRows.length === 0 && (
-                      <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-6">Tudo em dia 🎉</TableCell></TableRow>
+                    {pledges.filter((p) => p.active).length === 0 && (
+                      <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-6">Nenhum padrinho ativo. Clique em "Adicionar padrinho" para começar.</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>
