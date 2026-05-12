@@ -25,6 +25,7 @@ interface Action {
   scheduled_at: string;
   location: string | null;
   published: boolean;
+  kind: "action" | "event";
 }
 
 const TAGS = ["Infância", "Terceira idade", "Famílias", "Meio ambiente", "Eventos"];
@@ -48,7 +49,7 @@ const AdminCalendario = () => {
   const fileRef = useRef<HTMLInputElement>(null);
   const [form, setForm] = useState({
     title: "", tag: "Eventos", story: "", description: "",
-    location: "", scheduled_at: "", published: true,
+    location: "", scheduled_at: "", published: true, kind: "event" as "event" | "action",
   });
 
   const load = async () => {
@@ -63,7 +64,7 @@ const AdminCalendario = () => {
 
   const reset = () => {
     setEditing(null); setFile(null);
-    setForm({ title: "", tag: "Eventos", story: "", description: "", location: "", scheduled_at: "", published: true });
+    setForm({ title: "", tag: "Eventos", story: "", description: "", location: "", scheduled_at: "", published: true, kind: "event" });
     if (fileRef.current) fileRef.current.value = "";
   };
 
@@ -83,6 +84,7 @@ const AdminCalendario = () => {
       location: a.location || "",
       scheduled_at: toLocalDatetime(new Date(a.scheduled_at)),
       published: a.published,
+      kind: (a.kind ?? "event") as "event" | "action",
     });
     setOpen(true);
   };
@@ -103,7 +105,7 @@ const AdminCalendario = () => {
         title: form.title, tag: form.tag, story: form.story || null,
         description: form.description, location: form.location || null,
         scheduled_at: new Date(form.scheduled_at).toISOString(),
-        published: form.published, image_url: imageUrl,
+        published: form.published, image_url: imageUrl, kind: form.kind,
       };
       if (editing) {
         const { error } = await supabase.from("actions" as any).update(payload).eq("id", editing.id);
