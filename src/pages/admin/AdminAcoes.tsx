@@ -45,6 +45,7 @@ const AdminAcoes = () => {
     const { data } = await supabase
       .from("actions" as any)
       .select("*")
+      .eq("kind", "action")
       .order("scheduled_at", { ascending: true, nullsFirst: false });
     setItems((data as any) ?? []);
   };
@@ -88,7 +89,7 @@ const AdminAcoes = () => {
         const { error } = await supabase.from("actions" as any).update(payload).eq("id", editing.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("actions" as any).insert({ ...payload, created_by: user?.id });
+        const { error } = await supabase.from("actions" as any).insert({ ...payload, kind: "action", created_by: user?.id });
         if (error) throw error;
       }
       toast.success("Salvo"); setOpen(false); reset(); load();
