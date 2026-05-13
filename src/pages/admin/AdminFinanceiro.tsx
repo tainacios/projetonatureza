@@ -440,7 +440,10 @@ const AdminFinanceiro = () => {
                         <TableCell className="font-bold">{fmtMoney(Number(p.monthly_amount))}</TableCell>
                         <TableCell>Dia {p.due_day}</TableCell>
                         <TableCell><span className="text-primary">Ativo</span></TableCell>
-                        <TableCell>
+                        <TableCell className="space-x-1 whitespace-nowrap">
+                          <Button size="sm" variant="outline" onClick={() => setHistoryPledge(p)}>
+                            Histórico
+                          </Button>
                           <Button size="sm" variant="ghost" onClick={() => editPledge(p)}>
                             <Pencil className="h-3 w-3" />
                           </Button>
