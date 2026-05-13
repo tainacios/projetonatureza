@@ -90,6 +90,14 @@ const AdminEcoPontos = () => {
     toast.success("Status atualizado"); load();
   };
 
+  const openDistribute = (userId?: string) => {
+    setTargetUser(userId ?? "");
+    setPointsValue("");
+    setReason("");
+    setActionName("");
+    setDistOpen(true);
+  };
+
   const submitPoints = async () => {
     const amount = parseInt(pointsValue, 10);
     if (!targetUser || !amount || !reason) return toast.error("Preencha voluntário, pontos e motivo");
@@ -117,17 +125,58 @@ const AdminEcoPontos = () => {
             <h1 className="font-display text-3xl font-bold text-primary">EcoPontos</h1>
             <p className="text-muted-foreground">Distribuição de pontos e gestão dos resgates</p>
           </div>
-          <Button onClick={() => setDistOpen(true)}>
+          <Button onClick={() => openDistribute()}>
             <Star className="h-4 w-4 mr-2" /> Distribuir pontos
           </Button>
         </div>
 
-        <Tabs defaultValue="resgates">
+        <Tabs defaultValue="voluntarios">
           <TabsList>
+            <TabsTrigger value="voluntarios">Voluntários</TabsTrigger>
             <TabsTrigger value="resgates">Resgates</TabsTrigger>
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
             <TabsTrigger value="historico">Histórico</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="voluntarios" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Star className="h-5 w-5 text-accent" /> Voluntários
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Lista de todos os voluntários. Use o botão para creditar pontos — o lançamento aparece no Histórico.
+                </p>
+              </CardHeader>
+              <CardContent className="p-0 overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/40 text-left">
+                    <tr>
+                      <th className="p-3">Voluntário</th>
+                      <th className="p-3">EcoPontos</th>
+                      <th className="p-3 text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {profiles.map((p) => (
+                      <tr key={p.id} className="border-t border-border/50">
+                        <td className="p-3">{p.full_name || "(sem nome)"}</td>
+                        <td className="p-3 font-bold text-accent">{p.eco_points} pts</td>
+                        <td className="p-3 text-right">
+                          <Button size="sm" variant="outline" onClick={() => openDistribute(p.id)}>
+                            <Star className="h-3 w-3 mr-1" /> Adicionar pontos
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                    {profiles.length === 0 && (
+                      <tr><td colSpan={3} className="p-6 text-center text-muted-foreground">Nenhum voluntário cadastrado.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="resgates" className="space-y-4">
             <div className="flex justify-end">
