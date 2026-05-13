@@ -84,6 +84,8 @@ const AdminFinanceiro = () => {
   });
 
   const [historyPledge, setHistoryPledge] = useState<Pledge | null>(null);
+
+  const load = async () => {
     const [{ data: p }, { data: pl }, { data: dn }, { data: tx }] = await Promise.all([
       supabase.from("profiles").select("id, full_name").order("full_name"),
       supabase.from("donor_pledges" as any).select("*"),
