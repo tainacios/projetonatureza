@@ -781,6 +781,67 @@ const AdminFinanceiro = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Dialog Pledge History */}
+        <Dialog open={!!historyPledge} onOpenChange={(o) => !o && setHistoryPledge(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Histórico — {historyPledge?.full_name}</DialogTitle>
+            </DialogHeader>
+            {historyPledge && (() => {
+              const list = donations
+                .filter((d) => d.user_id === historyPledge.user_id)
+                .sort((a, b) => b.reference_month.localeCompare(a.reference_month));
+              const totalPaid = list.filter((d) => d.status === "paid").reduce((s, d) => s + Number(d.amount), 0);
+              return (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-3 gap-3 text-sm">
+                    <div className="rounded-lg bg-muted/40 p-3">
+                      <div className="text-muted-foreground">Compromisso</div>
+                      <div className="font-bold">{fmtMoney(Number(historyPledge.monthly_amount))}/mês</div>
+                    </div>
+                    <div className="rounded-lg bg-muted/40 p-3">
+                      <div className="text-muted-foreground">Vencimento</div>
+                      <div className="font-bold">Dia {historyPledge.due_day}</div>
+                    </div>
+                    <div className="rounded-lg bg-muted/40 p-3">
+                      <div className="text-muted-foreground">Total pago</div>
+                      <div className="font-bold text-primary">{fmtMoney(totalPaid)}</div>
+                    </div>
+                  </div>
+                  <div className="max-h-[400px] overflow-y-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Mês</TableHead>
+                          <TableHead>Valor</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Pago em</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {list.map((d) => (
+                          <TableRow key={d.id}>
+                            <TableCell className="capitalize">{monthLabel(d.reference_month)}</TableCell>
+                            <TableCell>{fmtMoney(Number(d.amount))}</TableCell>
+                            <TableCell><span className={statusClass(d.status)}>{STATUS_LABEL[d.status]}</span></TableCell>
+                            <TableCell>{d.paid_at ? new Date(d.paid_at).toLocaleDateString("pt-BR") : "—"}</TableCell>
+                          </TableRow>
+                        ))}
+                        {list.length === 0 && (
+                          <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-6">Sem doações registradas.</TableCell></TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                </div>
+              );
+            })()}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setHistoryPledge(null)}>Fechar</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AdminLayout>
   );
