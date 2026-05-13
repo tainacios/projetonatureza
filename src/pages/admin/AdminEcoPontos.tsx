@@ -90,6 +90,14 @@ const AdminEcoPontos = () => {
     toast.success("Status atualizado"); load();
   };
 
+  const openDistribute = (userId?: string) => {
+    setTargetUser(userId ?? "");
+    setPointsValue("");
+    setReason("");
+    setActionName("");
+    setDistOpen(true);
+  };
+
   const submitPoints = async () => {
     const amount = parseInt(pointsValue, 10);
     if (!targetUser || !amount || !reason) return toast.error("Preencha voluntário, pontos e motivo");
