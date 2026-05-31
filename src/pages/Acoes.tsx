@@ -10,7 +10,7 @@ import familyImg from "@/assets/action-family.jpg";
 const acoes = [
   {
     img: childrenImg,
-    tag: "Infância",
+    tag: "Infância 50",
     title: "Sementes do amanhã",
     story: "Em uma tarde de sábado, Júlia, 7 anos, plantou seu primeiro pé de jabuticaba. Disse que ia voltar quando fosse mais alta que a árvore. Esse é o nosso trabalho — fazer com que ela queira voltar.",
     desc: "Atendemos crianças em situação de vulnerabilidade com oficinas de arte, reforço escolar, alimentação e, principalmente, escuta. Cada criança merece sentir que tem um lugar no mundo."
