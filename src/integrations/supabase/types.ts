@@ -14,8 +14,153 @@ export type Database = {
   }
   public: {
     Tables: {
+      actions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string
+          id: string
+          image_url: string | null
+          kind: Database["public"]["Enums"]["action_kind"]
+          location: string | null
+          published: boolean
+          scheduled_at: string | null
+          story: string | null
+          tag: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          image_url?: string | null
+          kind?: Database["public"]["Enums"]["action_kind"]
+          location?: string | null
+          published?: boolean
+          scheduled_at?: string | null
+          story?: string | null
+          tag?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          id?: string
+          image_url?: string | null
+          kind?: Database["public"]["Enums"]["action_kind"]
+          location?: string | null
+          published?: boolean
+          scheduled_at?: string | null
+          story?: string | null
+          tag?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      admin_permissions: {
+        Row: {
+          created_at: string
+          granted: boolean
+          id: string
+          module: Database["public"]["Enums"]["permission_module"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          module: Database["public"]["Enums"]["permission_module"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted?: boolean
+          id?: string
+          module?: Database["public"]["Enums"]["permission_module"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      donations: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          paid_at: string | null
+          reference_month: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          reference_month: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          reference_month?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      donor_pledges: {
+        Row: {
+          active: boolean
+          created_at: string
+          due_day: number
+          id: string
+          monthly_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          due_day?: number
+          id?: string
+          monthly_amount?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          due_day?: number
+          id?: string
+          monthly_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ecopoints_terms_acceptance: {
         Row: {
+          accepted: boolean
           accepted_at: string
           id: string
           signature_name: string
@@ -23,6 +168,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accepted?: boolean
           accepted_at?: string
           id?: string
           signature_name: string
@@ -30,6 +176,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accepted?: boolean
           accepted_at?: string
           id?: string
           signature_name?: string
@@ -38,8 +185,75 @@ export type Database = {
         }
         Relationships: []
       }
+      gallery_photos: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          image_url: string
+          published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url: string
+          published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string
+          published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      points_history: {
+        Row: {
+          action_name: string | null
+          amount: number
+          created_at: string
+          created_by: string | null
+          id: string
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          action_name?: string | null
+          amount: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason: string
+          user_id: string
+        }
+        Update: {
+          action_name?: string | null
+          amount?: number
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          reason?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          active: boolean
           created_at: string
           eco_points: number
           full_name: string
@@ -47,6 +261,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active?: boolean
           created_at?: string
           eco_points?: number
           full_name?: string
@@ -54,6 +269,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active?: boolean
           created_at?: string
           eco_points?: number
           full_name?: string
@@ -176,15 +392,114 @@ export type Database = {
         }
         Relationships: []
       }
+      treasury_transactions: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          kind: string
+          occurred_at: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          kind: string
+          occurred_at?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          kind?: string
+          occurred_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_ecopoints_terms: {
+        Args: { _signature_name: string; _terms_version?: string }
+        Returns: {
+          accepted: boolean
+          accepted_at: string
+          id: string
+          signature_name: string
+          terms_version: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ecopoints_terms_acceptance"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      has_accepted_ecopoints_terms: {
+        Args: { _terms_version?: string }
+        Returns: boolean
+      }
+      has_permission: {
+        Args: {
+          _module: Database["public"]["Enums"]["permission_module"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      action_kind: "action" | "event"
+      app_role: "admin" | "volunteer" | "master_admin"
+      permission_module:
+        | "loja"
+        | "galeria"
+        | "depoimentos"
+        | "acoes"
+        | "ecopontos"
+        | "financeiro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -311,6 +626,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      action_kind: ["action", "event"],
+      app_role: ["admin", "volunteer", "master_admin"],
+      permission_module: [
+        "loja",
+        "galeria",
+        "depoimentos",
+        "acoes",
+        "ecopontos",
+        "financeiro",
+      ],
+    },
   },
 } as const

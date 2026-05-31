@@ -21,6 +21,8 @@ const signInSchema = z.object({
   password: z.string().min(1, "Informe sua senha"),
 });
 
+const TERMS_VERSION = "1.0";
+
 const Auth = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -52,7 +54,7 @@ const Auth = () => {
       return;
     }
     toast.success("Bem-vindo(a) à rede! 🌱");
-    navigate("/dashboard");
+    navigate("/termo-ecopontos");
   };
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -64,17 +66,36 @@ const Auth = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({
       email: parsed.data.email,
       password: parsed.data.password,
     });
-    setLoading(false);
-    if (error) {
+    if (error || !signInData.user) {
+      setLoading(false);
       toast.error("Email ou senha inválidos");
       return;
     }
+    const [{ data: adminRole, error: roleError }, { data: termsRecord, error: termsError }] =
+      await Promise.all([
+        supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", signInData.user.id)
+          .in("role", ["admin", "master_admin"])
+          .maybeSingle(),
+        supabase
+          .from("ecopoints_terms_acceptance")
+          .select("id")
+          .eq("user_id", signInData.user.id)
+          .eq("terms_version", TERMS_VERSION)
+          .eq("accepted", true)
+          .maybeSingle(),
+      ]);
+    if (roleError) console.error("Erro ao verificar perfil admin:", roleError);
+    if (termsError) console.error("Erro ao verificar aceite do termo:", termsError);
+    setLoading(false);
     toast.success("Que bom te ver de novo!");
-    navigate("/dashboard");
+    navigate(adminRole ? "/admin" : termsRecord ? "/dashboard" : "/termo-ecopontos");
   };
 
   return (

@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut } from "lucide-react";
+import { Menu, X, LogOut, Shield } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
 
@@ -19,6 +20,7 @@ const links = [
 
 export const Navbar = () => {
   const { user, signOut } = useAuth();
+  const { isAdmin } = useUserRole();
   const location = useLocation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -56,6 +58,11 @@ export const Navbar = () => {
         <div className="hidden md:flex items-center gap-2">
           {user ? (
             <>
+              {isAdmin && (
+                <Button variant="outline" size="sm" onClick={() => navigate("/admin")}>
+                  <Shield className="h-4 w-4 mr-1" /> Admin
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
                 Minha área
               </Button>
@@ -91,11 +98,18 @@ export const Navbar = () => {
                 {l.label}
               </Link>
             ))}
-            <div className="pt-2">
+            <div className="pt-2 space-y-2">
               {user ? (
-                <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
-                  Minha área
-                </Button>
+                <>
+                  {isAdmin && (
+                    <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/admin"); }}>
+                      <Shield className="h-4 w-4 mr-1" /> Admin
+                    </Button>
+                  )}
+                  <Button variant="outline" className="w-full" onClick={() => { setOpen(false); navigate("/dashboard"); }}>
+                    Minha área
+                  </Button>
+                </>
               ) : (
                 <Button variant="hero" className="w-full" onClick={() => { setOpen(false); navigate("/auth"); }}>
                   Sou voluntário

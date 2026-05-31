@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTermsAcceptance } from "@/hooks/useTermsAcceptance";
+import { useUserRole } from "@/hooks/useUserRole";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { CheckCircle2, FileText, Leaf, ShieldCheck, Sparkles } from "lucide-react";
@@ -19,6 +20,7 @@ const TermoEcoPontos = () => {
   const [params] = useSearchParams();
   const viewOnly = params.get("view") === "1";
   const { acceptance, hasAccepted, loading: termsLoading, refresh } = useTermsAcceptance();
+  const { isAdmin, loading: roleLoading } = useUserRole();
 
   const [checked, setChecked] = useState(false);
   const [signature, setSignature] = useState("");
@@ -31,10 +33,11 @@ const TermoEcoPontos = () => {
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    if (!termsLoading && hasAccepted && !viewOnly) {
-      navigate("/loja", { replace: true });
+    if (!termsLoading && !roleLoading && !viewOnly) {
+      if (isAdmin) navigate("/admin", { replace: true });
+      else if (hasAccepted) navigate("/loja", { replace: true });
     }
-  }, [termsLoading, hasAccepted, viewOnly, navigate]);
+  }, [termsLoading, roleLoading, isAdmin, hasAccepted, viewOnly, navigate]);
 
   const onScroll = () => {
     const el = scrollRef.current;
@@ -48,24 +51,25 @@ const TermoEcoPontos = () => {
   );
 
   const handleAccept = async () => {
-    if (!user || !canSubmit) return;
+    if (!user || submitting || !canSubmit) return;
     setSubmitting(true);
-    const { error } = await supabase.from("ecopoints_terms_acceptance").insert({
-      user_id: user.id,
-      signature_name: signature.trim(),
-      terms_version: TERMS_VERSION,
+    const { error } = await supabase.rpc("accept_ecopoints_terms", {
+      _signature_name: signature.trim(),
+      _terms_version: TERMS_VERSION,
     });
-    setSubmitting(false);
     if (error) {
+      console.error("Erro ao aceitar termo EcoPontos:", error);
+      setSubmitting(false);
       toast.error("Não foi possível registrar o aceite. Tente novamente.");
       return;
     }
     toast.success("🌿 Termo aceito! Bem-vindo(a) ao EcoPontos.");
     await refresh();
+    setSubmitting(false);
     navigate("/loja", { replace: true });
   };
 
-  if (authLoading || termsLoading) {
+  if (authLoading || termsLoading || roleLoading) {
     return (
       <Layout>
         <div className="container py-20 text-center text-muted-foreground">Carregando termo...</div>
