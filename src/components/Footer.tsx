@@ -16,7 +16,7 @@ export const Footer = () => (
           "O propósito da vida é uma vida com propósito."
         </p>
         <p className="mt-4 text-sm text-earth-foreground/60 max-w-md">
-          Uma rede de apoio que transforma vidas através do amor, da solidariedade e da fé —
+          Uma rede de apoio que transforma vidas através do amor, da solidariedade e da fé,
           cuidando de pessoas, do meio ambiente e dos animais.
         </p>
       </div>
@@ -34,11 +34,8 @@ export const Footer = () => (
       <div>
         <h4 className="font-semibold mb-4">Conecte-se</h4>
         <div className="flex gap-3">
-          <a href="#" aria-label="Instagram" className="h-10 w-10 rounded-full bg-earth-foreground/10 hover:bg-accent flex items-center justify-center transition-colors">
+          <a href="https://www.instagram.com/projetonaturezatc/" aria-label="Instagram" className="h-10 w-10 rounded-full bg-earth-foreground/10 hover:bg-accent flex items-center justify-center transition-colors">
             <Instagram className="h-4 w-4" />
-          </a>
-          <a href="#" aria-label="Facebook" className="h-10 w-10 rounded-full bg-earth-foreground/10 hover:bg-accent flex items-center justify-center transition-colors">
-            <Facebook className="h-4 w-4" />
           </a>
           <a href="mailto:contato@projetonatureza.org" aria-label="Email" className="h-10 w-10 rounded-full bg-earth-foreground/10 hover:bg-accent flex items-center justify-center transition-colors">
             <Mail className="h-4 w-4" />

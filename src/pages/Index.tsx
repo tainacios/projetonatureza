@@ -13,8 +13,8 @@ import familyImg from "@/assets/action-family.jpg";
 const actions = [
   { img: childrenImg, title: "Crianças", desc: "Acolhemos crianças em situação de vulnerabilidade com afeto, educação e oportunidades.", color: "accent" },
   { img: elderlyImg, title: "Idosos", desc: "Companhia, escuta e cuidado para quem nos ensinou tudo o que sabemos.", color: "leaf" },
-  { img: familyImg, title: "Famílias", desc: "Apoio integral a famílias em risco social, fortalecendo vínculos e dignidade.", color: "earth" },
-  { img: natureImg, title: "Natureza & Animais", desc: "Reflorestamento, resgate animal e educação ambiental para um planeta vivo.", color: "primary" },
+  { img: familyImg, title: "Famílias", desc: "Campanhas de doação que conectam corações generosos a famílias em situação de vulnerabilidade.", color: "earth" },
+  { img: natureImg, title: "Natureza & Animais", desc: "Viabilizamos o amparo animal e o reflorestamento através de redes de solidariedade, feiras de adoção e consciência ambiental.", color: "primary" },
 ];
 
 const Index = () => {
@@ -37,7 +37,7 @@ const Index = () => {
                 <span className="block italic text-accent">é uma vida com propósito.</span>
               </h1>
               <p className="text-lg text-foreground/70 mb-8 max-w-lg leading-relaxed">
-                Somos uma rede de pessoas comuns realizando coisas extraordinárias —
+                Somos uma rede de pessoas comuns realizando coisas extraordinárias,
                 transformando vidas através do amor, da solidariedade e da fé.
               </p>
               <div className="flex flex-wrap gap-4">
@@ -52,9 +52,10 @@ const Index = () => {
               </div>
 
               <div className="flex items-center gap-8 mt-12 pt-8 border-t border-border/50">
-                <Stat number="2.5k" label="Vidas transformadas" />
-                <Stat number="180+" label="Voluntários ativos" />
-                <Stat number="42" label="Ações por mês" />
+                <Stat number="500+" label="Pessoas alcançadas" />
+                <Stat number="30+" label="Voluntários ativos" />
+                <Stat number="20+" label="Animais doados" />
+                <Stat number="+12" label="Ações realizadas" />
               </div>
             </div>
 
@@ -92,9 +93,8 @@ const Index = () => {
             <span className="italic text-accent">Acreditamos em pessoas.</span>
           </h2>
           <p className="text-lg text-foreground/70 leading-relaxed">
-            O Projeto Natureza nasceu de uma certeza simples: quando o amor encontra a ação,
-            ele se torna transformação. Aqui, cada voluntário é semente — e cada semente,
-            uma promessa de futuro.
+          O Projeto Natureza nasceu da convicção de que pequenas ações mobilizadas podem transformar realidades complexas. Mais do que um projeto social, somos uma rede de apoio dedicada a promover o bem-estar integral da sociedade, atuando onde a vulnerabilidade se faz presente e onde a compaixão é necessária.
+          titulo acho que pode ser: Inspirar. Acolher. Cuidar.
           </p>
         </div>
       </section>
@@ -153,7 +153,7 @@ const Index = () => {
           <div>
             <span className="text-secondary font-semibold uppercase tracking-widest text-sm">Programa EcoPontos</span>
             <h2 className="font-display text-4xl md:text-5xl font-bold mt-3 mb-6 text-balance">
-              Seu engajamento gera impacto — e recompensa.
+              Seu engajamento gera impacto e recompensa.
             </h2>
             <p className="text-lg text-primary-foreground/80 mb-8 leading-relaxed">
               Cada ação, cada reunião, cada gesto vira EcoPontos. Acumule, suba no ranking
