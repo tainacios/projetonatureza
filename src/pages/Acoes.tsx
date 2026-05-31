@@ -41,7 +41,7 @@ const Acoes = () => {
             Cada história importa.
           </h1>
           <p className="text-lg text-foreground/70">
-            Conheça as frentes em que atuamos — e as vidas por trás de cada número.
+            Conheça as frentes em que atuamos, e as vidas por trás de cada número.
           </p>
         </div>
       </section>

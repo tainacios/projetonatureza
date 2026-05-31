@@ -27,17 +27,17 @@ const Sobre = () => (
           <img src={heroImg} alt="Voluntários unidos plantando uma árvore" className="w-full h-[500px] object-cover" loading="lazy" />
         </div>
         <div>
-          <span className="text-accent font-semibold uppercase tracking-widest text-sm">Nossa história</span>
-          <h2 className="font-display text-4xl font-bold text-primary mt-3 mb-6">De um sonho a uma rede viva</h2>
+          <span className="text-accent font-semibold uppercase tracking-widest text-sm">A Jornada de um Coração:</span>
+          <h2 className="font-display text-4xl font-bold text-primary mt-3 mb-6">Como o Projeto Natureza Criou Raízes</h2>
           <div className="space-y-4 text-foreground/70 leading-relaxed">
             <p>
-              Tudo começou com um pequeno grupo de amigos que decidiu transformar incômodo em ação.
-              O que era um café aos sábados virou mutirão. O mutirão virou rede. A rede virou projeto.
+            O Projeto Natureza nasceu de um propósito cultivado desde a infância de sua fundadora, inspirada pelo exemplo de serviço e amor ao próximo. Durante anos, ela realizou ações solidárias de forma independente, levando apoio, carinho e esperança a crianças e famílias.
+
+Com o tempo, esse propósito se expandiu: sua roça tornou-se um espaço de acolhimento para crianças viverem momentos de liberdade e contato com a natureza, além de servir como refúgio para animais resgatados e reabilitados. Com o tempo, a iniciativa se espalhou: amigos se juntaram, e o projeto Natureza começou a crescer. 
             </p>
             <p>
-              Hoje, somos centenas de voluntários atuando lado a lado com crianças, idosos, famílias
-              em vulnerabilidade e o meio ambiente — sempre com a mesma certeza inicial:
-              <strong className="text-primary"> ninguém transforma o mundo sozinho.</strong>
+            Em fevereiro de 2025, através de um convite nas redes sociais, outros corações se uniram a essa missão, transformando uma jornada individual no Projeto Natureza. Hoje, cada ação realizada mantém viva a essência que deu origem ao projeto: servir pessoas e animais com amor, fé e propósito, mostrando que
+              <strong className="text-primary"> a vida ganha mais sentido quando é vivida para fazer a diferença.</strong>
             </p>
           </div>
         </div>
@@ -65,10 +65,10 @@ const Sobre = () => (
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
           {[
-            { n: "2.500+", l: "Vidas transformadas", icon: Heart },
-            { n: "180+", l: "Voluntários ativos", icon: Users },
-            { n: "12.000", l: "Árvores plantadas", icon: Leaf },
-            { n: "98%", l: "Famílias acolhidas", icon: Star },
+            { n: "500+", l: "Pessoas alcançadas", icon: Heart },
+            { n: "30+", l: "Voluntários ativos", icon: Users },
+            { n: "20+", l: "Animais doados", icon: Leaf },
+            { n: "+12", l: "Ações realizadas", icon: Star },
           ].map((s) => (
             <div key={s.l} className="text-center bg-card rounded-3xl p-8 shadow-soft hover:shadow-leaf transition-shadow">
               <s.icon className="h-8 w-8 text-accent mx-auto mb-4" />
