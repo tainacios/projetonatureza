@@ -8,6 +8,8 @@ import Index from "./pages/Index.tsx";
 import Sobre from "./pages/Sobre.tsx";
 import Acoes from "./pages/Acoes.tsx";
 import Auth from "./pages/Auth.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import Loja from "./pages/Loja.tsx";
 import Depoimentos from "./pages/Depoimentos.tsx";
 import Transparencia from "./pages/Transparencia.tsx";
@@ -44,6 +46,8 @@ const App = () => (
             <Route path="/sobre" element={<Sobre />} />
             <Route path="/acoes" element={<Acoes />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/loja" element={<Loja />} />
             <Route path="/depoimentos" element={<Depoimentos />} />
             <Route path="/transparencia" element={<Transparencia />} />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Layout } from "@/components/Layout";
@@ -132,6 +132,11 @@ const Auth = () => {
                   <Button type="submit" variant="hero" className="w-full" disabled={loading}>
                     {loading ? "Entrando..." : "Entrar na minha área"}
                   </Button>
+                  <div className="text-center">
+                    <Link to="/forgot-password" className="text-sm text-accent hover:underline">
+                      Esqueci minha senha
+                    </Link>
+                  </div>
                 </form>
               </TabsContent>
 
